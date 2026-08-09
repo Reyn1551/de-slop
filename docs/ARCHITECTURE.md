@@ -41,7 +41,7 @@
 
 | Modul | API | Fungsi |
 |---|---|---|
-| `slop-scanner` | `scanSource`, `applyFixes`, `rules` | 6 rules AST anti-slop (redundant comment, dead code, over-wrapper, unused var, empty catch, hardcoded secret) |
+| `slop-scanner` | `scanSource`, `applyFixes`, `rules` | 12 rules AST anti-slop (redundant comment, dead code, over-wrapper, unused var, empty catch, hardcoded secret, generic name, injection risk, unresolved import, sycophancy, accept-all, missing docs) |
 | `test-lock` | `lockTestFile`, `verifyTestFile`, `fingerprintTests` | Fingerprint sha256 AST test file; deteksi test dihapus/di-skip/assertion dilemahkan/dimocking berlebihan |
 | `package-gate` | `checkPackage`, `checkPackages`, `parseInstallCommand` | Validasi umur + downloads package (npm/pypi) untuk anti-slopsquatting |
 | `circuit-breaker` | `CircuitBreaker`, `countChangedLines`, `saveState` | Budget retry/tool-calls/diff-lines untuk hentikan doom loop agen |

@@ -20,6 +20,7 @@
 - [x] `spec-contractor` engine
 - [x] `ast-pruner` context compaction
 - [x] E2E tests penuh untuk MCP tools (SDK client, 4 tools)
+- [x] Behavioral rules: `no-sycophancy`, `no-accept-all`, `no-missing-docs` + gap rules `no-injection-risk`, `no-unresolved-import`, `no-generic-name` (total 12 rules)
 - [ ] VS Code extension
 
 ## v1.0 — Release
