@@ -1,14 +1,21 @@
 import { chmodSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { GITHUB_ACTION_WORKFLOW, MCP_CONFIG_CURSOR, MCP_CONFIG_CLAUDE } from '../templates.js';
+import { parseArgs } from '../args.js';
 
 export const help = `de-slop init — scaffold de-slop in the current project
 
-Usage: de-slop init
+Usage: de-slop init [options]
 
 Creates:
   .desloprc.json        default configuration
   .de-slop/             store dir for test-lock fingerprints
   .git/hooks/pre-commit runs 'de-slop check . --lock' on every commit
+
+Options:
+  --ci                  also write .github/workflows/de-slop.yml (GitHub Actions)
+  --mcp <target>        also write MCP server config for 'cursor' or 'claude'
+  --help                Show this help
 
 Existing files are never overwritten.
 `;
@@ -31,7 +38,8 @@ fi
 exit 0
 `;
 
-export default async function init() {
+export default async function init(argv) {
+  const { options } = parseArgs(argv);
   const created = [];
 
   if (!existsSync(CONFIG_FILE)) {
@@ -56,6 +64,34 @@ export default async function init() {
       created.push('.git/hooks/pre-commit');
     } else {
       console.log('de-slop: .git/hooks/pre-commit already exists, leaving it untouched');
+    }
+  }
+
+  if (options.ci) {
+    const workflowDir = join('.github', 'workflows');
+    const workflowPath = join(workflowDir, 'de-slop.yml');
+    if (!existsSync(workflowPath)) {
+      mkdirSync(workflowDir, { recursive: true });
+      writeFileSync(workflowPath, GITHUB_ACTION_WORKFLOW, 'utf8');
+      created.push('.github/workflows/de-slop.yml');
+    } else {
+      console.log('de-slop: .github/workflows/de-slop.yml already exists, leaving it untouched');
+    }
+  }
+
+  if (options.mcp) {
+    const target = String(options.mcp).toLowerCase();
+    const template = target === 'cursor' ? MCP_CONFIG_CURSOR : target === 'claude' ? MCP_CONFIG_CLAUDE : null;
+    if (template === null) {
+      console.error(`de-slop: --mcp must be 'cursor' or 'claude', got '${target}'`);
+      return 1;
+    }
+    const mcpPath = target === 'cursor' ? '.mcp.json' : '.claude.json';
+    if (!existsSync(mcpPath)) {
+      writeFileSync(mcpPath, template, 'utf8');
+      created.push(mcpPath);
+    } else {
+      console.log(`de-slop: ${mcpPath} already exists, leaving it untouched`);
     }
   }
 

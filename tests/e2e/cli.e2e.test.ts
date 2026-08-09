@@ -70,6 +70,29 @@ describe('cli e2e', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
+  it('init --ci and --mcp write distribution templates', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-tpl-'));
+    writeFileSync(join(dir, 'package.json'), '{"name":"t","version":"0.0.0"}');
+    const { stdout, status } = runCli(['init', '--ci', '--mcp', 'cursor'], { cwd: dir });
+    expect(status).toBe(0);
+    expect(existsSync(join(dir, '.github/workflows/de-slop.yml'))).toBe(true);
+    expect(existsSync(join(dir, '.mcp.json'))).toBe(true);
+    const workflow = readFileSync(join(dir, '.github/workflows/de-slop.yml'), 'utf8');
+    expect(workflow).toContain('de-slop check . --lock');
+    const mcp = JSON.parse(readFileSync(join(dir, '.mcp.json'), 'utf8'));
+    expect(mcp.mcpServers['de-slop']).toBeDefined();
+    expect(stdout).toContain('de-slop.yml');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('init --mcp rejects unknown target', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-mcpbad-'));
+    writeFileSync(join(dir, 'package.json'), '{"name":"t","version":"0.0.0"}');
+    const { status } = runCli(['init', '--mcp', 'bogus'], { cwd: dir });
+    expect(status).toBe(1);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
   it('intercept blocks malformed install command', () => {
     const { stdout, status } = runCli(['intercept', 'not an install']);
     expect(status).toBe(1);
