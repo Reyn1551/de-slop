@@ -1,10 +1,13 @@
 import type { Rule } from '../types';
 import { noAcceptAll } from './no-accept-all';
+import { noCodeBloat } from './no-code-bloat';
 import { noDeadCode } from './no-dead-code';
+import { noDebugLogging } from './no-debug-logging';
 import { noEmptyCatch } from './no-empty-catch';
 import { noGenericName } from './no-generic-name';
 import { noHardcodedSecret } from './no-hardcoded-secret';
 import { noInjectionRisk } from './no-injection-risk';
+import { noMagicString } from './no-magic-string';
 import { noMissingDocs } from './no-missing-docs';
 import { noOverWrapper } from './no-over-wrapper';
 import { noRedundantComment } from './no-redundant-comment';
@@ -25,4 +28,7 @@ export const rules: Rule[] = [
   noMissingDocs,
   noSycophancy,
   noAcceptAll,
+  noDebugLogging,
+  noCodeBloat,
+  noMagicString,
 ];

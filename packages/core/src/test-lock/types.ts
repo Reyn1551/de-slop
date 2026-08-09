@@ -23,7 +23,7 @@ export interface TestFileFingerprint {
 }
 
 export interface TestViolation {
-  type: 'test-removed' | 'test-skipped' | 'assertion-weakened' | 'assertion-removed' | 'over-mocking';
+  type: 'test-removed' | 'test-skipped' | 'assertion-weakened' | 'assertion-removed' | 'over-mocking' | 'trivial-assertion' | 'missing-edge-case' | 'flaky-mock';
   message: string;
   testName?: string;
   line?: number;

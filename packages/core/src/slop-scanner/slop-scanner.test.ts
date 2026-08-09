@@ -317,6 +317,124 @@ describe('no-missing-docs', () => {
   });
 });
 
+describe('no-debug-logging', () => {
+  it('flags console.log when it appears 3+ times', () => {
+    const code =
+      'console.log("a");\n' +
+      'console.log("b");\n' +
+      'console.log("c");\n';
+    const diags = scanSource(code, 'dbg.ts', { rules: ['no-debug-logging'] });
+    expect(diags.some((d) => d.ruleId === 'no-debug-logging')).toBe(true);
+  });
+
+  it('flags console.info and console.warn spam', () => {
+    const code =
+      'console.info("a");\n' +
+      'console.warn("b");\n' +
+      'console.warn("c");\n';
+    expect(ids(code)).toContain('no-debug-logging');
+  });
+
+  it('allows one or two intentional console.log calls', () => {
+    const code = 'console.log("start");\nconst x = 1;\nconsole.log(x);\n';
+    expect(ids(code)).not.toContain('no-debug-logging');
+  });
+
+  it('skips test files', () => {
+    const code =
+      'console.log("a");\n' +
+      'console.log("b");\n' +
+      'console.log("c");\n';
+    expect(ids(code, 'foo.test.ts')).not.toContain('no-debug-logging');
+    expect(ids(code, 'foo.spec.ts')).not.toContain('no-debug-logging');
+  });
+
+  it('emits warning severity', () => {
+    const code = 'console.log("a");\nconsole.log("b");\nconsole.log("c");\n';
+    const diags = scanSource(code, 'dbg.ts', { rules: ['no-debug-logging'] });
+    expect(diags[0].severity).toBe('warning');
+  });
+});
+
+describe('no-code-bloat', () => {
+  it('flags function with more than 80 lines of body', () => {
+    const lines = Array.from({ length: 82 }, (_, i) => `  const v${i} = ${i};`).join('\n');
+    const code = `function big() {\n${lines}\n}\nbig();\n`;
+    const diags = scanSource(code, 'bloat.ts', { rules: ['no-code-bloat'] });
+    expect(diags.some((d) => d.ruleId === 'no-code-bloat')).toBe(true);
+  });
+
+  it('flags function with more than 5 parameters', () => {
+    const code =
+      'function manyArgs(a, b, c, d, e, f) {\n  return a + b + c + d + e + f;\n}\nmanyArgs(1, 2, 3, 4, 5, 6);\n';
+    const diags = scanSource(code, 'bloat.ts', { rules: ['no-code-bloat'] });
+    expect(diags.some((d) => d.ruleId === 'no-code-bloat')).toBe(true);
+  });
+
+  it('flags complex arrow function with long expression body', () => {
+    const body = Array.from({ length: 30 }, (_, i) => `user.field${i}`).join(' + ');
+    const code = `const total = (user) => ${body};\nconsole.log(total);\n`;
+    const diags = scanSource(code, 'bloat.ts', { rules: ['no-code-bloat'] });
+    expect(diags.some((d) => d.ruleId === 'no-code-bloat')).toBe(true);
+  });
+
+  it('allows compact functions', () => {
+    const code =
+      'function small(a: number, b: number): number {\n  return a + b;\n}\n' +
+      'const add = (a: number) => a + 1;\n' +
+      'const obj = { method(a: number) { return a * 2; } };\n' +
+      'console.log(small(1, 2), add(1), obj.method(2));\n';
+    expect(ids(code)).not.toContain('no-code-bloat');
+  });
+
+  it('emits warning severity', () => {
+    const code = 'function manyArgs(a, b, c, d, e, f) {\n  return a + b + c + d + e + f;\n}\nmanyArgs(1, 2, 3, 4, 5, 6);\n';
+    const diags = scanSource(code, 'bloat.ts', { rules: ['no-code-bloat'] });
+    expect(diags[0].severity).toBe('warning');
+  });
+});
+
+describe('no-magic-string', () => {
+  it('flags hardcoded URL string outside config', () => {
+    const code = 'const endpoint = "https://api.example.com/v1/users";\nconsole.log(endpoint);\n';
+    const diags = scanSource(code, 'magic.ts', { rules: ['no-magic-string'] });
+    expect(diags.some((d) => d.ruleId === 'no-magic-string')).toBe(true);
+  });
+
+  it('flags number strings that look like ports or timeouts', () => {
+    const code = 'const port = "8080";\nconst timeout = "3600000";\nconsole.log(port, timeout);\n';
+    const diags = scanSource(code, 'magic.ts', { rules: ['no-magic-string'] });
+    expect(diags.some((d) => d.ruleId === 'no-magic-string')).toBe(true);
+  });
+
+  it('flags email-like and domain strings', () => {
+    const code = 'const contact = "support@example.com";\nconst host = "api.example.com";\nconsole.log(contact, host);\n';
+    const diags = scanSource(code, 'magic.ts', { rules: ['no-magic-string'] });
+    expect(diags.some((d) => d.ruleId === 'no-magic-string')).toBe(true);
+  });
+
+  it('skips imports, error messages and short strings', () => {
+    const code =
+      'import { readFile } from "node:fs";\n' +
+      'const err = "user not found";\n' +
+      'const label = "ok";\n' +
+      'const css = { color: "red" };\n' +
+      'console.log(readFile, err, label, css.color);\n';
+    expect(ids(code)).not.toContain('no-magic-string');
+  });
+
+  it('skips URLs inside config files', () => {
+    const code = 'export const apiBaseUrl = "https://api.example.com";\n';
+    expect(ids(code, 'config.ts')).not.toContain('no-magic-string');
+  });
+
+  it('emits warning severity', () => {
+    const code = 'const port = "8080";\nconsole.log(port);\n';
+    const diags = scanSource(code, 'magic.ts', { rules: ['no-magic-string'] });
+    expect(diags[0].severity).toBe('warning');
+  });
+});
+
 describe('applyFixes', () => {
   it('applies multiple fixes from end of file to start', () => {
     const code = '// increment the counter\ncounter++;\nfunction f() {\n  return 1;\n  const dead = 2;\n}\nf();\n';

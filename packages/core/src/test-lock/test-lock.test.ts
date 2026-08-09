@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test } from 'vitest';
 import { fingerprintTests } from './fingerprint';
-import { verifyTests } from './verify';
+import { verifyTests, verifyAssertionQuality } from './verify';
 import { lockTestFile, verifyTestFile } from './store';
 
 const BASE_SOURCE = [
@@ -141,6 +141,58 @@ describe('verifyTests', () => {
 
     expect(violations).toContainEqual(
       expect.objectContaining({ type: 'over-mocking', testName: 'uses mocks' }),
+    );
+  });
+});
+
+describe('verifyAssertionQuality', () => {
+  test('detects trivial assertion expect(true).toBe(true)', () => {
+    const violations = verifyAssertionQuality(
+      "it('always passes', () => { expect(true).toBe(true); });",
+      'trivial.test.ts',
+    );
+    expect(violations).toContainEqual(
+      expect.objectContaining({ type: 'trivial-assertion' }),
+    );
+  });
+
+  test('does not flag meaningful assertion', () => {
+    const violations = verifyAssertionQuality(
+      "it('adds', () => { expect(add(1, 2)).toBe(3); });",
+      'ok.test.ts',
+    );
+    expect(violations).not.toContainEqual(
+      expect.objectContaining({ type: 'trivial-assertion' }),
+    );
+  });
+
+  test('detects missing edge case coverage', () => {
+    const violations = verifyAssertionQuality(
+      "it('happy path only', () => { expect(add(1, 2)).toBe(3); });",
+      'happy.test.ts',
+    );
+    expect(violations).toContainEqual(
+      expect.objectContaining({ type: 'missing-edge-case' }),
+    );
+  });
+
+  test('flags unconfigured mock', () => {
+    const violations = verifyAssertionQuality(
+      "it('mocks', () => { const fn = vi.fn(); fn(); expect(fn).toHaveBeenCalled(); });",
+      'mock.test.ts',
+    );
+    expect(violations).toContainEqual(
+      expect.objectContaining({ type: 'flaky-mock' }),
+    );
+  });
+
+  test('does not flag configured mock', () => {
+    const violations = verifyAssertionQuality(
+      "it('mocks', () => { const fn = vi.fn(() => 42); expect(fn()).toBe(42); });",
+      'mock.test.ts',
+    );
+    expect(violations).not.toContainEqual(
+      expect.objectContaining({ type: 'flaky-mock' }),
     );
   });
 });

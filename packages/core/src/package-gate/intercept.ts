@@ -66,3 +66,23 @@ export function parseInstallCommand(cmd: string): InstallCommand | null {
 
   return null;
 }
+
+const BLOCKED_INSTALL_PATTERNS = [
+  { pattern: /\bsudo\b/, reason: 'install with sudo — potential privilege escalation risk' },
+  { pattern: /--unsafe-perm/, reason: '--unsafe-perm disables security checks during install' },
+  { pattern: /--registry=/, reason: 'custom registry URL — verify trust before installing' },
+  { pattern: /\bcurl\s+.*\|\s*(?:bash|sh)\b/, reason: 'curl pipe to shell — arbitrary code execution risk' },
+  { pattern: /\bwget\s+.*-\s*(?:bash|sh)\b/, reason: 'wget pipe to shell — arbitrary code execution risk' },
+];
+
+export function checkInstallScript(installCommand: string): { verdict: 'allow' | 'block' | 'warn'; reason?: string } {
+  const trimmed = installCommand.trim();
+
+  for (const { pattern, reason } of BLOCKED_INSTALL_PATTERNS) {
+    if (pattern.test(trimmed)) {
+      return { verdict: 'block', reason };
+    }
+  }
+
+  return { verdict: 'allow' };
+}

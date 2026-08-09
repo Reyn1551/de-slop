@@ -20,5 +20,6 @@ export type {
   ParameterDeclaration,
   SourceFile,
   Statement,
+  StringLiteral,
   VariableDeclaration,
 } from 'typescript/unstable/ast' with { 'resolution-mode': 'import' };

