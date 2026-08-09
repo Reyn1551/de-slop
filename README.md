@@ -1,13 +1,13 @@
 # de-slop
 
-Anti AI-slop toolkit untuk vibe coding era. Melindungi codebase dari masalah umum kode hasil AI: test yang ditulis ulang agar lolos, spec drift, slopsquatting, infinite retry loops, dan boilerplate slop.
+Anti AI-slop toolkit untuk era vibe coding. Guardrail multi-lapis yang melindungi codebase dari masalah umum kode hasil AI: test yang ditulis ulang agar lolos, spec drift, slopsquatting, infinite retry loops, dan boilerplate slop.
 
 ## Quick Start
 
 ```bash
-npx de-slop init     # setup di proyekmu
-npx de-slop check    # scan AI slop
-npx de-slop fix      # auto-fix
+npx de-slop init     # setup .desloprc.json + pre-commit hook
+npx de-slop check    # scan AI slop, exit 1 jika ada error
+npx de-slop fix      # auto-fix yang aman
 npx de-slop mcp      # MCP server untuk Cursor/Claude Code
 ```
 
@@ -15,22 +15,15 @@ npx de-slop mcp      # MCP server untuk Cursor/Claude Code
 
 | Modul | Fungsi |
 |---|---|
-| `test-lock` | Kunci unit test via AST fingerprint — AI tidak bisa ubah test diam-diam |
-| `spec-contractor` | Tegakkan kontrak spec-driven development |
-| `slop-scanner` | AST linter untuk pola AI slop |
-| `package-gate` | Firewall anti-slopsquatting (validasi package sebelum install) |
-| `circuit-breaker` | Hentikan infinite doom loop agen AI |
-| `runtime-guard` | Validasi edge-cases & memory leaks |
+| `slop-scanner` | 6 rules AST linter untuk pola AI slop (redundant comment, dead code, unused var, hardcoded secret, dll) |
+| `test-lock` | Kunci unit test via AST fingerprint sha256 — AI tidak bisa mengubah/melemahkan test diam-diam |
+| `spec-contractor` | Tegakkan kontrak spec-driven development (missing function + invariants) |
+| `package-gate` | Firewall anti-slopsquatting (validasi umur + downloads package sebelum install) |
+| `circuit-breaker` | Hentikan infinite doom loop agen AI (budget retry/tool-calls/diff) |
+| `runtime-guard` | Validasi edge-cases & memory leaks (floating promise, unhandled null, cleanup) |
+| `ast-pruner` | Ringkas file ke deklarasi relevan untuk cegah context rot |
 
-## GitHub Action
-
-```yaml
-- uses: de-slop/action@v1
-  with:
-    command: check
-```
-
-## MCP Integration
+## Integrasi MCP
 
 ```json
 {
@@ -40,7 +33,27 @@ npx de-slop mcp      # MCP server untuk Cursor/Claude Code
 }
 ```
 
-Lihat `docs/` untuk detail arsitektur, taksonomi masalah, dan roadmap.
+Tools: `check_slop`, `verify_tests`, `check_package`, `spec_verify`.
+
+## GitHub Action
+
+```yaml
+- uses: de-slop/action@v1
+  with:
+    command: check
+```
+
+## Development
+
+```bash
+npm run build       # compile core + mcp-server ke dist
+npm test            # vitest (119 tests)
+npm run typecheck   # tsc --noEmit
+```
+
+Catatan: repo pakai `typescript@7` (native tsgo). Analisis AST lewat bridge `ts-api.ts` (lihat `docs/ARCHITECTURE.md`).
+
+Lihat `docs/` untuk arsitektur, taksonomi masalah, dan roadmap.
 
 ## License
 
