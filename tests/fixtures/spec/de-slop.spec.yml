@@ -1,0 +1,7 @@
+specs:
+  - id: counter-spec
+    functions:
+      - count
+    invariants:
+      - count must not be logged
+      - no hardcoded secret

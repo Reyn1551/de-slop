@@ -1,0 +1,284 @@
+{
+  "/tmp/deslop-lock-z0a0qZ/locked.test.ts": {
+    "filePath": "/tmp/deslop-lock-z0a0qZ/locked.test.ts",
+    "hash": "04b97dca1cfc074865c5f401fed15ca8a93715aa6d02bcdbbf43865526068efb",
+    "testCount": 3,
+    "assertionCount": 2,
+    "tests": [
+      {
+        "name": "counter",
+        "kind": "describe",
+        "skipped": false,
+        "line": 3,
+        "mockCalls": 0,
+        "statements": 0,
+        "assertions": []
+      },
+      {
+        "name": "increments by one",
+        "kind": "it",
+        "skipped": false,
+        "line": 4,
+        "mockCalls": 0,
+        "statements": 3,
+        "assertions": [
+          {
+            "kind": "expect",
+            "argsShape": "expect(count).toBe(num:1)",
+            "line": 7
+          }
+        ]
+      },
+      {
+        "name": "keeps working across calls",
+        "kind": "it",
+        "skipped": false,
+        "line": 10,
+        "mockCalls": 0,
+        "statements": 1,
+        "assertions": [
+          {
+            "kind": "expect",
+            "argsShape": "expect(kind:TypeOfExpression).toBe(str:function)",
+            "line": 11
+          }
+        ]
+      }
+    ]
+  },
+  "/tmp/deslop-lock-5Z3pmu/locked.test.ts": {
+    "filePath": "/tmp/deslop-lock-5Z3pmu/locked.test.ts",
+    "hash": "04b97dca1cfc074865c5f401fed15ca8a93715aa6d02bcdbbf43865526068efb",
+    "testCount": 3,
+    "assertionCount": 2,
+    "tests": [
+      {
+        "name": "counter",
+        "kind": "describe",
+        "skipped": false,
+        "line": 3,
+        "mockCalls": 0,
+        "statements": 0,
+        "assertions": []
+      },
+      {
+        "name": "increments by one",
+        "kind": "it",
+        "skipped": false,
+        "line": 4,
+        "mockCalls": 0,
+        "statements": 3,
+        "assertions": [
+          {
+            "kind": "expect",
+            "argsShape": "expect(count).toBe(num:1)",
+            "line": 7
+          }
+        ]
+      },
+      {
+        "name": "keeps working across calls",
+        "kind": "it",
+        "skipped": false,
+        "line": 10,
+        "mockCalls": 0,
+        "statements": 1,
+        "assertions": [
+          {
+            "kind": "expect",
+            "argsShape": "expect(kind:TypeOfExpression).toBe(str:function)",
+            "line": 11
+          }
+        ]
+      }
+    ]
+  },
+  "/tmp/deslop-lock-dcqPgr/locked.test.ts": {
+    "filePath": "/tmp/deslop-lock-dcqPgr/locked.test.ts",
+    "hash": "04b97dca1cfc074865c5f401fed15ca8a93715aa6d02bcdbbf43865526068efb",
+    "testCount": 3,
+    "assertionCount": 2,
+    "tests": [
+      {
+        "name": "counter",
+        "kind": "describe",
+        "skipped": false,
+        "line": 3,
+        "mockCalls": 0,
+        "statements": 0,
+        "assertions": []
+      },
+      {
+        "name": "increments by one",
+        "kind": "it",
+        "skipped": false,
+        "line": 4,
+        "mockCalls": 0,
+        "statements": 3,
+        "assertions": [
+          {
+            "kind": "expect",
+            "argsShape": "expect(count).toBe(num:1)",
+            "line": 7
+          }
+        ]
+      },
+      {
+        "name": "keeps working across calls",
+        "kind": "it",
+        "skipped": false,
+        "line": 10,
+        "mockCalls": 0,
+        "statements": 1,
+        "assertions": [
+          {
+            "kind": "expect",
+            "argsShape": "expect(kind:TypeOfExpression).toBe(str:function)",
+            "line": 11
+          }
+        ]
+      }
+    ]
+  },
+  "/tmp/deslop-lock-wfmmUf/locked.test.ts": {
+    "filePath": "/tmp/deslop-lock-wfmmUf/locked.test.ts",
+    "hash": "04b97dca1cfc074865c5f401fed15ca8a93715aa6d02bcdbbf43865526068efb",
+    "testCount": 3,
+    "assertionCount": 2,
+    "tests": [
+      {
+        "name": "counter",
+        "kind": "describe",
+        "skipped": false,
+        "line": 3,
+        "mockCalls": 0,
+        "statements": 0,
+        "assertions": []
+      },
+      {
+        "name": "increments by one",
+        "kind": "it",
+        "skipped": false,
+        "line": 4,
+        "mockCalls": 0,
+        "statements": 3,
+        "assertions": [
+          {
+            "kind": "expect",
+            "argsShape": "expect(count).toBe(num:1)",
+            "line": 7
+          }
+        ]
+      },
+      {
+        "name": "keeps working across calls",
+        "kind": "it",
+        "skipped": false,
+        "line": 10,
+        "mockCalls": 0,
+        "statements": 1,
+        "assertions": [
+          {
+            "kind": "expect",
+            "argsShape": "expect(kind:TypeOfExpression).toBe(str:function)",
+            "line": 11
+          }
+        ]
+      }
+    ]
+  },
+  "/tmp/deslop-lock-KL0x19/locked.test.ts": {
+    "filePath": "/tmp/deslop-lock-KL0x19/locked.test.ts",
+    "hash": "04b97dca1cfc074865c5f401fed15ca8a93715aa6d02bcdbbf43865526068efb",
+    "testCount": 3,
+    "assertionCount": 2,
+    "tests": [
+      {
+        "name": "counter",
+        "kind": "describe",
+        "skipped": false,
+        "line": 3,
+        "mockCalls": 0,
+        "statements": 0,
+        "assertions": []
+      },
+      {
+        "name": "increments by one",
+        "kind": "it",
+        "skipped": false,
+        "line": 4,
+        "mockCalls": 0,
+        "statements": 3,
+        "assertions": [
+          {
+            "kind": "expect",
+            "argsShape": "expect(count).toBe(num:1)",
+            "line": 7
+          }
+        ]
+      },
+      {
+        "name": "keeps working across calls",
+        "kind": "it",
+        "skipped": false,
+        "line": 10,
+        "mockCalls": 0,
+        "statements": 1,
+        "assertions": [
+          {
+            "kind": "expect",
+            "argsShape": "expect(kind:TypeOfExpression).toBe(str:function)",
+            "line": 11
+          }
+        ]
+      }
+    ]
+  },
+  "/tmp/deslop-lock-fcQulU/locked.test.ts": {
+    "filePath": "/tmp/deslop-lock-fcQulU/locked.test.ts",
+    "hash": "04b97dca1cfc074865c5f401fed15ca8a93715aa6d02bcdbbf43865526068efb",
+    "testCount": 3,
+    "assertionCount": 2,
+    "tests": [
+      {
+        "name": "counter",
+        "kind": "describe",
+        "skipped": false,
+        "line": 3,
+        "mockCalls": 0,
+        "statements": 0,
+        "assertions": []
+      },
+      {
+        "name": "increments by one",
+        "kind": "it",
+        "skipped": false,
+        "line": 4,
+        "mockCalls": 0,
+        "statements": 3,
+        "assertions": [
+          {
+            "kind": "expect",
+            "argsShape": "expect(count).toBe(num:1)",
+            "line": 7
+          }
+        ]
+      },
+      {
+        "name": "keeps working across calls",
+        "kind": "it",
+        "skipped": false,
+        "line": 10,
+        "mockCalls": 0,
+        "statements": 1,
+        "assertions": [
+          {
+            "kind": "expect",
+            "argsShape": "expect(kind:TypeOfExpression).toBe(str:function)",
+            "line": 11
+          }
+        ]
+      }
+    ]
+  }
+}
