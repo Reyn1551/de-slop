@@ -4,6 +4,7 @@
   "description": "de-slop MCP server for Cursor/Claude Code",
   "main": "src/index.js",
   "dependencies": {
-    "@de-slop/core": "*"
+    "@de-slop/core": "*",
+    "@modelcontextprotocol/sdk": "^1.30.0"
   }
 }

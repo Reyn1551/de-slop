@@ -1,34 +1,58 @@
 #!/usr/bin/env node
 
-const commands = ['init', 'check', 'fix', 'mcp'];
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-async function main() {
-  const [cmd, ...args] = process.argv.slice(2);
+const COMMANDS = ['init', 'check', 'fix', 'mcp'];
 
-  if (!cmd || cmd === '--help' || cmd === '-h') {
-    console.log(`de-slop — anti AI-slop toolkit
+function cliVersion() {
+  const packageJson = fileURLToPath(new URL('../package.json', import.meta.url));
+  return JSON.parse(readFileSync(packageJson, 'utf8')).version;
+}
 
-Usage: de-slop <command>
+const GLOBAL_HELP = `de-slop — anti AI-slop toolkit (v${cliVersion()})
+
+Usage: de-slop <command> [options]
 
 Commands:
-  init    Inisialisasi de-slop di proyek (rules, hooks, config)
+  init    Inisialisasi de-slop di proyek (config, store, pre-commit hook)
   check   Scan kode untuk AI slop patterns
   fix     Perbaiki slop secara otomatis (jika memungkinkan)
   mcp     Jalankan MCP server untuk Cursor/Claude Code
-`);
-    process.exit(0);
-  }
 
-  if (!commands.includes(cmd)) {
-    console.error(`Unknown command: ${cmd}`);
-    process.exit(1);
+Run 'de-slop <command> --help' for command-specific options.
+`;
+
+async function main() {
+  const [cmd, ...rest] = process.argv.slice(2);
+
+  if (cmd === '--version' || cmd === '-v') {
+    console.log(cliVersion());
+    return 0;
+  }
+  if (!cmd || cmd === '--help' || cmd === '-h') {
+    console.log(GLOBAL_HELP);
+    return 0;
+  }
+  if (!COMMANDS.includes(cmd)) {
+    console.error(`de-slop: unknown command '${cmd}'. Run 'de-slop --help' for usage.`);
+    return 1;
   }
 
   const mod = await import(`../src/commands/${cmd}.js`);
-  await mod.default(args);
+  if (rest.includes('--help') || rest.includes('-h')) {
+    console.log(mod.help);
+    return 0;
+  }
+  return (await mod.default(rest)) ?? 0;
 }
 
-main().catch((err) => {
-  console.error(err.message);
-  process.exit(1);
-});
+main().then(
+  (exitCode) => {
+    process.exitCode = exitCode;
+  },
+  (err) => {
+    console.error(`de-slop: ${err.message}`);
+    process.exitCode = 1;
+  }
+);

@@ -3,11 +3,11 @@ import type * as Ast from 'typescript/unstable/ast' with { 'resolution-mode': 'i
 import type * as Fs from 'typescript/unstable/fs' with { 'resolution-mode': 'import' };
 import type * as Sync from 'typescript/unstable/sync' with { 'resolution-mode': 'import' };
 
-const require = createRequire(__filename);
+const localRequire = createRequire(__filename);
 
-export const ast = require('typescript/unstable/ast') as typeof Ast;
-export const fs = require('typescript/unstable/fs') as typeof Fs;
-export const sync = require('typescript/unstable/sync') as typeof Sync;
+export const ast = localRequire('typescript/unstable/ast') as typeof Ast;
+export const fs = localRequire('typescript/unstable/fs') as typeof Fs;
+export const sync = localRequire('typescript/unstable/sync') as typeof Sync;
 
 export type {
   ArrowFunction,

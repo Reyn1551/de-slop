@@ -2,11 +2,13 @@
   "name": "@de-slop/cli",
   "version": "0.1.0",
   "description": "npx de-slop CLI",
+  "type": "module",
   "bin": {
     "de-slop": "bin/de-slop.js"
   },
   "main": "src/index.js",
   "dependencies": {
-    "@de-slop/core": "*"
+    "@de-slop/core": "*",
+    "@de-slop/mcp-server": "*"
   }
 }

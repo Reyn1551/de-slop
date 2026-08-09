@@ -1,0 +1,21 @@
+export * as slopScanner from './slop-scanner';
+export * as testLock from './test-lock';
+export * as packageGate from './package-gate';
+export * as circuitBreaker from './circuit-breaker';
+export * as runtimeGuard from './runtime-guard';
+export * as specContractor from './spec-contractor';
+export * as astPruner from './ast-pruner';
+
+export { scanSource } from './slop-scanner';
+export type { Diagnostic } from './slop-scanner';
+export { fingerprintTests, verifyTests, lockTestFile, verifyTestFile } from './test-lock';
+export type { TestViolation, TestFileFingerprint } from './test-lock';
+export { checkPackage, checkPackages, parseInstallCommand } from './package-gate';
+export type { PackageReport, Verdict } from './package-gate';
+export { CircuitBreaker, countChangedLines, saveState, loadState } from './circuit-breaker';
+export type { BreakerOptions, BreakerState } from './circuit-breaker';
+export { CircuitBreakerTrippedError } from './circuit-breaker';
+export { guardSource } from './runtime-guard';
+export { parseSpecFile, verifySpec, runSpecCheck } from './spec-contractor';
+export type { SpecViolation } from './spec-contractor';
+export { pruneSource, pruneFiles } from './ast-pruner';
