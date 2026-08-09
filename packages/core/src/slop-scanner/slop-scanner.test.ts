@@ -267,6 +267,56 @@ describe('no-generic-name', () => {
   });
 });
 
+describe('no-sycophancy', () => {
+  it('flags uncritical agreement comments', () => {
+    const code = '// Great point, exactly as you said — I agree completely\nconst fix = applyPatch(patch);\nconsole.log(fix);\n';
+    const diags = scanSource(code, 'syc.ts', { rules: ['no-sycophancy'] });
+    expect(diags.some((d) => d.ruleId === 'no-sycophancy')).toBe(true);
+  });
+
+  it('allows factual comments', () => {
+    const code = '// Apply the patch from the hotfix branch\nconst fix = applyPatch(patch);\nconsole.log(fix);\n';
+    expect(scanSource(code, 'ok.ts', { rules: ['no-sycophancy'] })).toEqual([]);
+  });
+});
+
+describe('no-accept-all', () => {
+  it('flags pasted error comments', () => {
+    const code = '// ReferenceError: foo is not defined\nconst foo = bar();\nconsole.log(foo);\n';
+    const diags = scanSource(code, 'acc.ts', { rules: ['no-accept-all'] });
+    expect(diags.some((d) => d.ruleId === 'no-accept-all')).toBe(true);
+  });
+
+  it('flags leftover debug residue', () => {
+    const code = '// temporarily logging for debugging purposes\nconst x = compute();\nconsole.log(x);\n';
+    const diags = scanSource(code, 'dbg.ts', { rules: ['no-accept-all'] });
+    expect(diags.some((d) => d.ruleId === 'no-accept-all')).toBe(true);
+  });
+
+  it('allows normal comments', () => {
+    const code = '// Recompute totals after the refund\nconst x = compute();\nconsole.log(x);\n';
+    expect(scanSource(code, 'ok.ts', { rules: ['no-accept-all'] })).toEqual([]);
+  });
+});
+
+describe('no-missing-docs', () => {
+  it('flags exported functions without JSDoc', () => {
+    const code = 'export function calculateTotal(items: number[]): number {\n  return items.reduce((a, b) => a + b, 0);\n}\n';
+    const diags = scanSource(code, 'doc.ts', { rules: ['no-missing-docs'] });
+    expect(diags.some((d) => d.ruleId === 'no-missing-docs')).toBe(true);
+  });
+
+  it('accepts exported functions with JSDoc', () => {
+    const code = '/** Sums a list of numbers. */\nexport function calculateTotal(items: number[]): number {\n  return items.reduce((a, b) => a + b, 0);\n}\n';
+    expect(scanSource(code, 'doc.ts', { rules: ['no-missing-docs'] })).toEqual([]);
+  });
+
+  it('does not flag internal (non-exported) functions', () => {
+    const code = 'function internalHelper() {\n  return 1;\n}\nconsole.log(internalHelper);\n';
+    expect(scanSource(code, 'doc.ts', { rules: ['no-missing-docs'] })).toEqual([]);
+  });
+});
+
 describe('applyFixes', () => {
   it('applies multiple fixes from end of file to start', () => {
     const code = '// increment the counter\ncounter++;\nfunction f() {\n  return 1;\n  const dead = 2;\n}\nf();\n';
