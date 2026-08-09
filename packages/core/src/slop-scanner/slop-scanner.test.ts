@@ -254,6 +254,19 @@ describe('no-unresolved-import', () => {
   });
 });
 
+describe('no-generic-name', () => {
+  it('flags generic variable names', () => {
+    const code = 'const data = fetchAll();\nconst result = process(data);\nconsole.log(result);\n';
+    const diags = scanSource(code, 'gen.ts', { rules: ['no-generic-name'] });
+    expect(diags.some((d) => d.ruleId === 'no-generic-name')).toBe(true);
+  });
+
+  it('allows descriptive names', () => {
+    const code = 'const userList = fetchAll();\nconst total = process(userList);\nconsole.log(total);\n';
+    expect(scanSource(code, 'ok.ts', { rules: ['no-generic-name'] })).toEqual([]);
+  });
+});
+
 describe('applyFixes', () => {
   it('applies multiple fixes from end of file to start', () => {
     const code = '// increment the counter\ncounter++;\nfunction f() {\n  return 1;\n  const dead = 2;\n}\nf();\n';
