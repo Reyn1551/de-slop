@@ -2,13 +2,22 @@
   "name": "@de-slop/core",
   "version": "0.1.0",
   "description": "de-slop analysis engine",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    "./test-lock": "./src/test-lock/index.js",
-    "./spec-contractor": "./src/spec-contractor/index.js",
-    "./slop-scanner": "./src/slop-scanner/index.js",
-    "./package-gate": "./src/package-gate/index.js",
-    "./circuit-breaker": "./src/circuit-breaker/index.js",
-    "./runtime-guard": "./src/runtime-guard/index.js"
+    ".": "./dist/index.js",
+    "./test-lock": "./dist/test-lock/index.js",
+    "./spec-contractor": "./dist/spec-contractor/index.js",
+    "./slop-scanner": "./dist/slop-scanner/index.js",
+    "./package-gate": "./dist/package-gate/index.js",
+    "./circuit-breaker": "./dist/circuit-breaker/index.js",
+    "./runtime-guard": "./dist/runtime-guard/index.js",
+    "./ast-pruner": "./dist/ast-pruner/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "typescript": "^7.0.0"
   }
 }

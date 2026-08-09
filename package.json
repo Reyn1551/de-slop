@@ -8,15 +8,15 @@
   ],
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p packages/core && tsc --noEmit -p packages/mcp-server",
     "test": "vitest run",
-    "build": "npm run build --workspaces --if-present"
+    "build": "tsc -p packages/core && tsc -p packages/mcp-server"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.4.0",
-    "vitest": "^1.5.0",
-    "eslint": "^8.57.0"
+    "@types/node": "^26.2.0",
+    "eslint": "^8.57.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=18"
