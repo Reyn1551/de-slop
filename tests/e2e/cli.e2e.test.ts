@@ -120,4 +120,18 @@ describe('cli e2e', () => {
     expect(violations.some((v: any) => v.type === 'assertion-weakened' || v.type === 'assertion-removed')).toBe(true);
     rmSync(dir, { recursive: true, force: true });
   });
+
+  it('report generates markdown and json', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-report-'));
+    const out = join(dir, 'out');
+    const { stdout, status } = runCli(['report', fixtures, '--out', out]);
+    expect(status).toBe(0);
+    expect(stdout).toContain('REPORT.md');
+    expect(stdout).toContain('report.json');
+    expect(existsSync(join(out, 'REPORT.md'))).toBe(true);
+    const md = readFileSync(join(out, 'REPORT.md'), 'utf8');
+    expect(md).toContain('de-slop Report');
+    expect(md).toContain('no-hardcoded-secret');
+    rmSync(dir, { recursive: true, force: true });
+  });
 });
