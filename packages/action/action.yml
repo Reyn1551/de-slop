@@ -12,11 +12,5 @@ inputs:
     description: Paths to scan
     default: "."
 runs:
-  using: composite
-  steps:
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 20
-    - name: Run de-slop
-      shell: bash
-      run: npx de-slop ${{ inputs.command }} ${{ inputs.paths }}
+  using: node20
+  main: index.js
