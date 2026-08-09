@@ -9,6 +9,7 @@ npx de-slop init     # setup .desloprc.json + pre-commit hook
 npx de-slop check    # scan AI slop, exit 1 jika ada error
 npx de-slop fix      # auto-fix yang aman
 npx de-slop mcp      # MCP server untuk Cursor/Claude Code
+npx de-slop intercept 'npm install <pkg>'   # cek package sebelum install (anti slopsquatting)
 ```
 
 ## Modul
@@ -41,13 +42,16 @@ Tools: `check_slop`, `verify_tests`, `check_package`, `spec_verify`.
 - uses: de-slop/action@v1
   with:
     command: check
+    paths: .
 ```
+
+Node20 JS action self-contained — auto-build core, tanpa dependensi tambahan. `de-slop init --ci` menulis workflow ini otomatis. `de-slop init --mcp cursor|claude` menulis config MCP server.
 
 ## Development
 
 ```bash
 npm run build       # compile core + mcp-server ke dist
-npm test            # vitest (119 tests)
+npm test            # vitest (129 tests)
 npm run typecheck   # tsc --noEmit
 ```
 
