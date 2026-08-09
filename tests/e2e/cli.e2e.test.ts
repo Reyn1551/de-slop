@@ -18,7 +18,7 @@ function runCli(args: string[], opts: { cwd?: string; input?: string } = {}): { 
     });
     return { stdout, status: 0 };
   } catch (err: any) {
-    return { stdout: err.stdout ?? '', status: err.status ?? 1 };
+    return { stdout: `${err.stdout ?? ''}${err.stderr ?? ''}`, status: err.status ?? 1 };
   }
 }
 
@@ -68,6 +68,18 @@ describe('cli e2e', () => {
     expect(existsSync(join(dir, '.git/hooks/pre-commit'))).toBe(true);
     expect(stdout).toContain('de-slop');
     rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('intercept blocks malformed install command', () => {
+    const { stdout, status } = runCli(['intercept', 'not an install']);
+    expect(status).toBe(1);
+    expect(stdout).toContain('could not parse install command');
+  });
+
+  it('intercept parses install command without network when --no-block on empty report', () => {
+    const { stdout, status } = runCli(['intercept', 'npm install']);
+    expect(status).toBe(1);
+    expect(stdout).toContain('could not parse install command');
   });
 
   it('verify tests against lock detects weakening', async () => {

@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const COMMANDS = ['init', 'check', 'fix', 'mcp'];
+const COMMANDS = ['init', 'check', 'fix', 'mcp', 'intercept'];
 
 function cliVersion() {
   const packageJson = fileURLToPath(new URL('../package.json', import.meta.url));
@@ -19,6 +19,7 @@ Commands:
   check   Scan kode untuk AI slop patterns
   fix     Perbaiki slop secara otomatis (jika memungkinkan)
   mcp     Jalankan MCP server untuk Cursor/Claude Code
+  intercept   Cek keamanan package sebelum install (anti slopsquatting)
 
 Run 'de-slop <command> --help' for command-specific options.
 `;
