@@ -21,6 +21,10 @@
 - [x] `ast-pruner` context compaction
 - [x] E2E tests penuh untuk MCP tools (SDK client, 4 tools)
 - [x] Behavioral rules: `no-sycophancy`, `no-accept-all`, `no-missing-docs` + gap rules `no-injection-risk`, `no-unresolved-import`, `no-generic-name` (total 12 rules)
+- [x] `agent-guard` module: 6 rules keamanan agent-AI (invisible unicode, prompt injection, malicious pattern, secret logging, destructive command, unsafe install docs)
+- [x] Test integrity +: `verifyAssertionQuality` (trivial assertion, flaky mock, happy-path-only)
+- [x] Supply chain +: `checkPackageManifest` (preinstall hook scan), `checkInstallScript` (block sudo/curl|sh/custom registry)
+- [x] Pre-commit hook block AI co-author trailers
 - [ ] VS Code extension
 
 ## v1.0 — Release

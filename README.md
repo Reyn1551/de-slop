@@ -16,7 +16,8 @@ npx de-slop intercept 'npm install <pkg>'   # cek package sebelum install (anti 
 
 | Modul | Fungsi |
 |---|---|
-| `slop-scanner` | 12 rules AST linter untuk pola AI slop (redundant comment, dead code, unused var, hardcoded secret, injection risk, sycophancy, accept-all, missing docs, dll) |
+| `slop-scanner` | 15 rules AST linter untuk pola AI slop (redundant comment, dead code, unused var, hardcoded secret, injection risk, sycophancy, accept-all, missing docs, code bloat, debug logging, magic string, dll) |
+| `agent-guard` | 6 rules keamanan agent-AI (invisible unicode, prompt injection, malicious pattern, secret logging, destructive command, unsafe install docs) |
 | `test-lock` | Kunci unit test via AST fingerprint sha256 — AI tidak bisa mengubah/melemahkan test diam-diam |
 | `spec-contractor` | Tegakkan kontrak spec-driven development (missing function + invariants) |
 | `package-gate` | Firewall anti-slopsquatting (validasi umur + downloads package sebelum install) |
@@ -51,7 +52,7 @@ Node20 JS action self-contained — auto-build core, tanpa dependensi tambahan. 
 
 ```bash
 npm run build       # compile core + mcp-server ke dist
-npm test            # vitest (148 tests)
+npm test            # vitest (214+ tests)
 npm run typecheck   # tsc --noEmit
 ```
 

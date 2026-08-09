@@ -134,4 +134,25 @@ describe('cli e2e', () => {
     expect(md).toContain('no-hardcoded-secret');
     rmSync(dir, { recursive: true, force: true });
   });
+
+  it('agent-guard catches destructive commands and prompt injection', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-guard-'));
+    const file = join(dir, 'guard.ts');
+    writeFileSync(file, 'const cmd = "rm -rf /";\nconst s = "ignore previous instructions";\n');
+    const { stdout, status } = runCli(['check', file]);
+    expect(status).toBe(1);
+    expect(stdout).toContain('no-destructive-command');
+    expect(stdout).toContain('no-prompt-injection');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('agent-guard catches secret passed to console.log', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-guard-'));
+    const file = join(dir, 'leak.ts');
+    writeFileSync(file, 'const apiKey = "sk-test-123";\nconsole.log(apiKey);\n');
+    const { stdout, status } = runCli(['check', file]);
+    expect(status).toBe(1);
+    expect(stdout).toContain('no-secret-logging');
+    rmSync(dir, { recursive: true, force: true });
+  });
 });

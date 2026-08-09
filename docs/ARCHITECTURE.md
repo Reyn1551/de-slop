@@ -16,6 +16,7 @@
               │ test-lock         │
               │ spec-contractor   │
               │ slop-scanner      │
+              │ agent-guard       │
               │ package-gate      │
               │ circuit-breaker   │
               │ runtime-guard     │
@@ -41,9 +42,10 @@
 
 | Modul | API | Fungsi |
 |---|---|---|
-| `slop-scanner` | `scanSource`, `applyFixes`, `rules` | 12 rules AST anti-slop (redundant comment, dead code, over-wrapper, unused var, empty catch, hardcoded secret, generic name, injection risk, unresolved import, sycophancy, accept-all, missing docs) |
-| `test-lock` | `lockTestFile`, `verifyTestFile`, `fingerprintTests` | Fingerprint sha256 AST test file; deteksi test dihapus/di-skip/assertion dilemahkan/dimocking berlebihan |
-| `package-gate` | `checkPackage`, `checkPackages`, `parseInstallCommand` | Validasi umur + downloads package (npm/pypi) untuk anti-slopsquatting |
+| `slop-scanner` | `scanSource`, `applyFixes`, `rules` | 15 rules AST anti-slop (redundant comment, dead code, over-wrapper, unused var, empty catch, hardcoded secret, generic name, injection risk, unresolved import, sycophancy, accept-all, missing docs, debug logging, code bloat, magic string) |
+| `agent-guard` | `agentGuardScan`, `agentGuardRules` | 6 rules keamanan agent-AI: invisible unicode, prompt injection, malicious pattern, secret logging, destructive command, unsafe install docs |
+| `test-lock` | `lockTestFile`, `verifyTestFile`, `fingerprintTests`, `verifyAssertionQuality` | Fingerprint sha256 AST test file; deteksi test dihapus/di-skip/assertion dilemahkan/dimocking berlebihan/trivial assertion/flaky mock/happy-path-only |
+| `package-gate` | `checkPackage`, `checkPackages`, `parseInstallCommand`, `checkPackageManifest`, `checkInstallScript` | Validasi umur + downloads package (npm/pypi), scan preinstall hooks, blok install berbahaya |
 | `circuit-breaker` | `CircuitBreaker`, `countChangedLines`, `saveState` | Budget retry/tool-calls/diff-lines untuk hentikan doom loop agen |
 | `runtime-guard` | `guardSource` | 3 rules edge-case: require-cleanup, floating-promise, unhandled-null |
 | `spec-contractor` | `runSpecCheck`, `parseSpecFile`, `verifySpec` | Tegakkan kontrak spec-driven (missing function + invariants) |
