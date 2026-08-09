@@ -1,0 +1,22 @@
+name: Feature Request
+description: Usulkan fitur baru untuk de-slop
+title: "[Feat]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Masalah yang Diselesaikan
+      description: Masalah vibe coding / AI slop apa yang ingin diatasi?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Usulan Solusi
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatif yang Dipertimbangkan

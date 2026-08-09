@@ -1,0 +1,30 @@
+name: Bug Report
+description: Laporkan bug pada de-slop
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Deskripsi Bug
+      description: Jelaskan bug yang ditemukan
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Cara Reproduksi
+      description: Langkah-langkah untuk mereproduksi bug
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Perilaku yang Diharapkan
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versi de-slop
+      placeholder: "0.1.0"

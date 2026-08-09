@@ -1,0 +1,9 @@
+{
+  "name": "@de-slop/mcp-server",
+  "version": "0.1.0",
+  "description": "de-slop MCP server for Cursor/Claude Code",
+  "main": "src/index.js",
+  "dependencies": {
+    "@de-slop/core": "*"
+  }
+}

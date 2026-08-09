@@ -1,0 +1,14 @@
+{
+  "name": "@de-slop/core",
+  "version": "0.1.0",
+  "description": "de-slop analysis engine",
+  "main": "src/index.js",
+  "exports": {
+    "./test-lock": "./src/test-lock/index.js",
+    "./spec-contractor": "./src/spec-contractor/index.js",
+    "./slop-scanner": "./src/slop-scanner/index.js",
+    "./package-gate": "./src/package-gate/index.js",
+    "./circuit-breaker": "./src/circuit-breaker/index.js",
+    "./runtime-guard": "./src/runtime-guard/index.js"
+  }
+}

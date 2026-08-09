@@ -1,0 +1,25 @@
+{
+  "name": "de-slop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Anti AI-slop toolkit: test-lock, spec-contractor, slop-scanner, package-gate, circuit-breaker, runtime-guard",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.5.0",
+    "eslint": "^8.57.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
