@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { applyFixes } from './fixer';
 import { scanSource } from './scanner';
+import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { readFileSync } from 'node:fs';
+
+function codeOf(path: string): string {
+  return readFileSync(path, 'utf8');
+}
 
 function ids(code: string, filePath = 'sample.ts'): string[] {
   return scanSource(code, filePath).map((d) => d.ruleId);
@@ -185,6 +193,64 @@ describe('no-hardcoded-secret', () => {
   it('ignores long strings without secret shape', () => {
     const code = 'const apiKey = "this is just an ordinary sentence";\nconsole.log(apiKey);\n';
     expect(ids(code)).not.toContain('no-hardcoded-secret');
+  });
+});
+
+describe('no-injection-risk', () => {
+  it('flags SQL injection via string concatenation with user input', () => {
+    const code =
+      'const query = "SELECT * FROM users WHERE id = " + req.body.id;\n' +
+      'db.query(query);\n';
+    const diags = scanSource(code, 'inj.ts', { rules: ['no-injection-risk'] });
+    expect(diags.some((d) => d.ruleId === 'no-injection-risk')).toBe(true);
+  });
+
+  it('flags command injection in exec with user input', () => {
+    const code = 'const out = exec("ls -la " + req.query.dir);\n';
+    const diags = scanSource(code, 'cmd.ts', { rules: ['no-injection-risk'] });
+    expect(diags.some((d) => d.ruleId === 'no-injection-risk')).toBe(true);
+  });
+
+  it('flags XSS via innerHTML with user input', () => {
+    const code = 'el.innerHTML = userInput;\n';
+    const diags = scanSource(code, 'xss.ts', { rules: ['no-injection-risk'] });
+    expect(diags.some((d) => d.ruleId === 'no-injection-risk')).toBe(true);
+  });
+
+  it('does not flag safe queries without user input', () => {
+    const code = 'const query = "SELECT * FROM users WHERE id = " + 42;\n';
+    expect(scanSource(code, 'safe.ts', { rules: ['no-injection-risk'] })).toEqual([]);
+  });
+});
+
+describe('no-unresolved-import', () => {
+  it('flags relative import that resolves nowhere', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-import-'));
+    const file = join(dir, 'real-file.ts');
+    writeFileSync(file, 'import { thing } from "./ghost-module";\nconsole.log(thing);\n');
+    const diags = scanSource(codeOf(file), file, { rules: ['no-unresolved-import'] });
+    expect(diags.some((d) => d.ruleId === 'no-unresolved-import')).toBe(true);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('accepts import that resolves to existing file', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-import-'));
+    const file = join(dir, 'real-file.ts');
+    const sibling = join(dir, 'ghost-module.ts');
+    writeFileSync(sibling, 'export const thing = 1;\n');
+    writeFileSync(file, 'import { thing } from "./ghost-module";\nconsole.log(thing);\n');
+    expect(scanSource(codeOf(file), file, { rules: ['no-unresolved-import'] })).toEqual([]);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('skips scans of virtual/in-memory files', () => {
+    const code = 'import { thing } from "./ghost-module";\nconsole.log(thing);\n';
+    expect(scanSource(code, 'virtual.ts', { rules: ['no-unresolved-import'] })).toEqual([]);
+  });
+
+  it('does not flag bare package imports', () => {
+    const code = 'import { readFile } from "node:fs";\nconsole.log(readFile);\n';
+    expect(scanSource(code, '/tmp/real-dir/pkg.ts', { rules: ['no-unresolved-import'] })).toEqual([]);
   });
 });
 

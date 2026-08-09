@@ -1,6 +1,8 @@
 import { rules } from './rules/index';
 import { fs, sync, type SourceFile } from './ts-api';
-import type { Diagnostic } from './types';
+import type { Diagnostic, RuleContext } from './types';
+import { existsSync, statSync } from 'node:fs';
+import { resolve, dirname, extname } from 'node:path';
 
 type FileSystem = ReturnType<typeof fs.createVirtualFileSystem>;
 
@@ -37,8 +39,16 @@ export function scanSource(code: string, filePath: string, options: ScanOptions 
   const sourceFile = parseSourceFile(code, filePath);
   const active = options.rules ? rules.filter((rule) => options.rules!.includes(rule.id)) : rules;
   const diagnostics: Diagnostic[] = [];
+  const ctx: RuleContext = {
+    filePath,
+    fileExists(p: string) {
+      try {
+        return existsSync(resolve(dirname(filePath), p)) || statSync(resolve(dirname(filePath), p)).isFile();
+      } catch { return false; }
+    },
+  };
   for (const rule of active) {
-    for (const finding of rule.check(sourceFile)) {
+    for (const finding of rule.check(sourceFile, ctx)) {
       diagnostics.push({ ...finding, ruleId: rule.id, filePath });
     }
   }

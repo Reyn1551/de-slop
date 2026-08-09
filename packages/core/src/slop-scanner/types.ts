@@ -10,7 +10,12 @@ export interface Diagnostic {
   fix?: { start: number; end: number; replacement: string };
 }
 
+export interface RuleContext {
+  filePath: string;
+  fileExists(path: string): boolean;
+}
+
 export type Rule = {
   id: string;
-  check(sourceFile: SourceFile): Omit<Diagnostic, 'filePath' | 'ruleId'>[];
+  check(sourceFile: SourceFile, context?: RuleContext): Omit<Diagnostic, 'filePath' | 'ruleId'>[];
 };
