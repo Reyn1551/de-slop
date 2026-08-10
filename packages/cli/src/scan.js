@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { extname } from 'node:path';
-import { agentGuardScan, guardSource, scanSource } from '@de-slop/core';
+import { agentGuardScan, designSlopScan, guardSource, scanSource } from '@de-slop/core';
 
 const CODE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.json']);
 const DOC_EXTENSIONS = new Set(['.md', '.mdx', '.txt', '.rst']);
@@ -57,6 +57,19 @@ export function scanFile(filePath, rules) {
       ruleId: 'scan-error',
       severity: 'error',
       message: `failed to scan: ${err.message}`,
+      filePath,
+      line: 0,
+      column: 0,
+    });
+  }
+
+  try {
+    diagnostics.push(...designSlopScan(code, filePath, options));
+  } catch (err) {
+    diagnostics.push({
+      ruleId: 'scan-error',
+      severity: 'error',
+      message: `failed to scan design: ${err.message}`,
       filePath,
       line: 0,
       column: 0,

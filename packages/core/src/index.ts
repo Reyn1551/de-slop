@@ -21,3 +21,6 @@ export { parseSpecFile, verifySpec, runSpecCheck } from './spec-contractor';
 export type { SpecViolation } from './spec-contractor';
 export { pruneSource, pruneFiles } from './ast-pruner';
 export { agentGuardScan } from './agent-guard';
+export * as designSlop from './design-slop';
+export { scanDesignSlop, designSlopScan } from './design-slop';
+export type { Diagnostic as DesignSlopDiagnostic } from './design-slop';

@@ -1,7 +1,7 @@
 import { readdirSync, statSync } from 'node:fs';
 import { extname, join } from 'node:path';
 
-export const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.json']);
+export const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.json', '.css']);
 export const DOC_EXTENSIONS = new Set(['.md', '.mdx', '.txt', '.rst']);
 export const EXCLUDED_FILES = new Set(['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun.lockb', 'bun.lock']);
 export const EXCLUDED_DIRS = new Set(['node_modules', 'dist', '.git']);

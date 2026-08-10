@@ -13,7 +13,8 @@
     "./circuit-breaker": "./dist/circuit-breaker/index.js",
     "./runtime-guard": "./dist/runtime-guard/index.js",
     "./ast-pruner": "./dist/ast-pruner/index.js",
-    "./agent-guard": "./dist/agent-guard/index.js"
+    "./agent-guard": "./dist/agent-guard/index.js",
+    "./design-slop": "./dist/design-slop/index.js"
   },
   "files": [
     "dist"
