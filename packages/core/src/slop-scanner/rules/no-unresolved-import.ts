@@ -17,7 +17,19 @@ export const noUnresolvedImport: Rule = {
       if (!isRelativeOrAbsolute(specifier)) return;
       if (context!.fileExists(specifier)) return;
       const hasExtension = /\.[a-zA-Z0-9]+$/.test(specifier);
-      if (!hasExtension) {
+
+      if (hasExtension) {
+        // TypeScript Node16: import './foo.js' resolves to './foo.ts' (or .tsx/.d.ts).
+        // Try the .js→.ts substitution before declaring it unresolved.
+        if (/\.[cm]?js$/.test(specifier)) {
+          const stripped = specifier.replace(/\.[cm]?js$/, '');
+          const tsCandidates = ['.ts', '.tsx', '.mts', '.cts', '.d.ts'];
+          for (const candidate of tsCandidates) {
+            if (context!.fileExists(`${stripped}${candidate}`)) return;
+          }
+        }
+        // If it has an extension and doesn't resolve, fall through to error.
+      } else {
         const candidates = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '/index.ts', '/index.js'];
         for (const candidate of candidates) {
           if (context!.fileExists(`${specifier}${candidate}`)) return;

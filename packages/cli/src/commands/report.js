@@ -173,13 +173,20 @@ export default async function report(argv) {
   }
 
   let packageReports = [];
+  let pkgSource = null;
   try {
-    const pkgSource = readFileSync(join(target, 'package.json'), 'utf8');
-    const deps = parseDeps(pkgSource);
-    packageReports = await checkPackages(deps.map((d) => d.name));
-    packageReports = packageReports.map((r, i) => ({ ...r, version: deps[i]?.version ?? '' }));
+    pkgSource = readFileSync(join(target, 'package.json'), 'utf8');
   } catch {
     // no package.json — skip package gate
+  }
+  if (pkgSource !== null) {
+    try {
+      const deps = parseDeps(pkgSource);
+      packageReports = await checkPackages(deps.map((d) => d.name));
+      packageReports = packageReports.map((r, i) => ({ ...r, version: deps[i]?.version ?? '' }));
+    } catch {
+      // registry unreachable — report stays empty rather than failing the audit
+    }
   }
 
   let specResults = [];

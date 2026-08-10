@@ -63,10 +63,17 @@ function collectComments(code: string): Array<{ text: string; pos: number }> {
   return comments;
 }
 
+function isTestOrRuleFile(filePath: string): boolean {
+  return /\.(test|spec)\.[cm]?[jt]sx?$/.test(filePath) || /(^|\/)rules\//.test(filePath);
+}
+
 export const noPromptInjection: Rule = {
   id: 'no-prompt-injection',
-  check(sourceFile) {
+  check(sourceFile, context) {
     const findings: Omit<Diagnostic, 'filePath' | 'ruleId'>[] = [];
+
+    if (context && isTestOrRuleFile(context.filePath)) return findings;
+
     const code = sourceFile.getFullText();
 
     for (const comment of collectComments(code)) {

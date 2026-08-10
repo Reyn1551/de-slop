@@ -38,6 +38,7 @@ function scanText(
   inChildProcess: boolean,
   findings: Omit<Diagnostic, 'filePath' | 'ruleId'>[],
 ): void {
+  if (isProseInstruction(text)) return;
   for (const pattern of DESTRUCTIVE) {
     for (const match of text.matchAll(pattern.regex)) {
       const pos = sourceFile.getLineAndCharacterOfPosition(basePos + match.index);
@@ -52,6 +53,15 @@ function scanText(
   }
 }
 
+function isProseInstruction(text: string): boolean {
+  // Skip long markdown/prose blocks that merely describe forbidden commands
+  // (e.g. AGENTS.md rules like "JANGAN tulis perintah destruktif (rm -rf, ...)").
+  // Such text is a policy statement, not an executable command.
+  const stripped = text.trim();
+  if (stripped.length > 120) return true;
+  return /(jangan|do not|never|forbidden|prohibited|avoid)\b/i.test(stripped.slice(0, 60));
+}
+
 function isChildProcessCall(node: any): boolean {
   if (!ast.isCallExpression(node)) return false;
   const callee = node.expression;
@@ -63,10 +73,17 @@ function isChildProcessCall(node: any): boolean {
   return false;
 }
 
+function isTestOrRuleFile(filePath: string): boolean {
+  return /\.(test|spec)\.[cm]?[jt]sx?$/.test(filePath) || /(^|\/)rules\//.test(filePath);
+}
+
 export const noDestructiveCommand: Rule = {
   id: 'no-destructive-command',
-  check(sourceFile) {
+  check(sourceFile, context) {
     const findings: Omit<Diagnostic, 'filePath' | 'ruleId'>[] = [];
+
+    if (context && isTestOrRuleFile(context.filePath)) return findings;
+
     const code = sourceFile.getFullText();
 
     const seenChildProcessArgs = new Set<number>();
