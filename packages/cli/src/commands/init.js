@@ -1,6 +1,6 @@
-import { chmodSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { GITHUB_ACTION_WORKFLOW, MCP_CONFIG_CURSOR, MCP_CONFIG_CLAUDE } from '../templates.js';
+import { GITHUB_ACTION_WORKFLOW, MCP_CONFIG_CURSOR, MCP_CONFIG_CLAUDE, AGENTS_DESLOP_RULES } from '../templates.js';
 import { parseArgs } from '../args.js';
 
 export const help = `de-slop init — scaffold de-slop in the current project
@@ -11,6 +11,7 @@ Creates:
   .desloprc.json        default configuration
   .de-slop/             store dir for test-lock fingerprints
   .git/hooks/pre-commit runs 'de-slop check . --lock' on every commit
+  AGENTS.md             de-slop rules appended/created as MUTLAK priority for AI agents
 
 Options:
   --ci                  also write .github/workflows/de-slop.yml (GitHub Actions)
@@ -101,6 +102,20 @@ export default async function init(argv) {
     } else {
       console.log(`de-slop: ${mcpPath} already exists, leaving it untouched`);
     }
+  }
+
+  const agentsPath = 'AGENTS.md';
+  if (existsSync(agentsPath)) {
+    const existing = readFileSync(agentsPath, 'utf8');
+    if (!existing.includes('## de-slop')) {
+      writeFileSync(agentsPath, existing + '\n' + AGENTS_DESLOP_RULES, 'utf8');
+      created.push(`${agentsPath} (appended de-slop rules as priority)`);
+    } else {
+      console.log('de-slop: AGENTS.md already contains de-slop rules, leaving it untouched');
+    }
+  } else {
+    writeFileSync(agentsPath, AGENTS_DESLOP_RULES, 'utf8');
+    created.push(agentsPath);
   }
 
   if (created.length > 0) {

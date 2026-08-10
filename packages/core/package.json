@@ -1,7 +1,7 @@
 {
   "name": "@de-slop/core",
   "version": "0.1.0",
-  "description": "de-slop analysis engine",
+  "description": "Anti AI-slop analysis engine: AST slop scanner, test-lock, spec-contractor, package-gate, circuit-breaker, runtime-guard, agent-guard",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -15,8 +15,30 @@
     "./ast-pruner": "./dist/ast-pruner/index.js",
     "./agent-guard": "./dist/agent-guard/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "ai",
+    "slop",
+    "linter",
+    "ast",
+    "guardrail",
+    "anti-ai",
+    "test-lock",
+    "code-quality"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Reyn1551/de-slop.git"
   },
   "dependencies": {
     "typescript": "^7.0.0"
