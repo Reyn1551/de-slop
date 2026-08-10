@@ -3,17 +3,19 @@ import type { Diagnostic } from './types';
 import { agentGuardRules } from './rules';
 import { noInvisibleUnicode } from './rules/no-invisible-unicode';
 import { noUnsafeInstallDocs } from './rules/no-unsafe-install-docs';
+import { noViteBoilerplate } from './rules/no-vite-boilerplate';
 
 export { agentGuardRules } from './rules';
 export type { AgentGuardResult, Diagnostic } from './types';
 export { noInvisibleUnicode } from './rules/no-invisible-unicode';
 export { noUnsafeInstallDocs } from './rules/no-unsafe-install-docs';
+export { noViteBoilerplate } from './rules/no-vite-boilerplate';
 
 export interface AgentGuardOptions {
   rules?: string[];
 }
 
-const TEXT_RULES = new Set(['no-invisible-unicode', 'no-unsafe-install-docs']);
+const TEXT_RULES = new Set(['no-invisible-unicode', 'no-unsafe-install-docs', 'no-vite-boilerplate']);
 
 const CODE_EXTENSIONS = /\.(ts|tsx|js|jsx|mts|cts|mjs|cjs|json)$/;
 
@@ -72,6 +74,12 @@ export function agentGuardScan(
   if (textRules.includes('no-invisible-unicode')) {
     for (const finding of noInvisibleUnicode(code, locator)) {
       diagnostics.push({ ...finding, ruleId: 'no-invisible-unicode', filePath });
+    }
+  }
+
+  if (textRules.includes('no-vite-boilerplate')) {
+    for (const finding of noViteBoilerplate(code, filePath, locator)) {
+      diagnostics.push({ ...finding, ruleId: 'no-vite-boilerplate', filePath });
     }
   }
 

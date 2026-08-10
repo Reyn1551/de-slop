@@ -128,3 +128,25 @@ document.getElementById('root').innerHTML = '';
     expect(ruleIds(code)).toContain('no-unhandled-null');
   });
 });
+
+describe('no-uncleaned-timer', () => {
+  it('flags setTimeout without cleanup', () => {
+    const code = `
+function showToast(msg: string) {
+  setToastMsg(msg);
+  setTimeout(() => setToastMsg(null), 3000);
+}
+`;
+    expect(ruleIds(code)).toContain('no-uncleaned-timer');
+  });
+
+  it('skips setTimeout inside useEffect with cleanup', () => {
+    const code = `
+useEffect(() => {
+  const id = setTimeout(() => run(), 1000);
+  return () => clearTimeout(id);
+}, []);
+`;
+    expect(ruleIds(code)).not.toContain('no-uncleaned-timer');
+  });
+});

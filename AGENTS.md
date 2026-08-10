@@ -26,7 +26,7 @@ Aturan ini mengikat semua agen AI yang bekerja di repo de-slop.
 ## Verifikasi
 ```bash
 npm run build       # tsc core + mcp-server → dist
-npm test            # vitest (semua test, ~119)
+npm test            # vitest (semua test, ~226)
 npm run typecheck   # tsc --noEmit core + mcp-server
 ```
 CLI butuh core di-build dulu: `npm run build` sebelum `node packages/cli/bin/de-slop.js`.

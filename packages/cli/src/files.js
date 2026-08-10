@@ -1,11 +1,13 @@
 import { readdirSync, statSync } from 'node:fs';
 import { extname, join } from 'node:path';
 
-export const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']);
+export const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.json']);
+export const DOC_EXTENSIONS = new Set(['.md', '.mdx', '.txt', '.rst']);
+export const EXCLUDED_FILES = new Set(['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun.lockb', 'bun.lock']);
 export const EXCLUDED_DIRS = new Set(['node_modules', 'dist', '.git']);
 
 export function isSourceFile(filePath) {
-  return SOURCE_EXTENSIONS.has(extname(filePath));
+  return SOURCE_EXTENSIONS.has(extname(filePath)) || DOC_EXTENSIONS.has(extname(filePath));
 }
 
 function walkDirectory(dir, files) {
@@ -16,7 +18,7 @@ function walkDirectory(dir, files) {
     return;
   }
   for (const entry of entries) {
-    if (entry.name.startsWith('.') || EXCLUDED_DIRS.has(entry.name)) continue;
+    if (entry.name.startsWith('.') || EXCLUDED_DIRS.has(entry.name) || EXCLUDED_FILES.has(entry.name)) continue;
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) walkDirectory(fullPath, files);
     else if (entry.isFile() && isSourceFile(fullPath)) files.push(fullPath);

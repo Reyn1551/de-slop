@@ -1,7 +1,9 @@
-import { verifyTestFile } from '@de-slop/core';
+import { verifyTestFile, checkPackageManifest } from '@de-slop/core';
 import { parseArgs } from '../args.js';
 import { findSourceFiles } from '../files.js';
 import { scanFile } from '../scan.js';
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 export const help = `de-slop check — scan source files for AI slop patterns
 
@@ -64,6 +66,26 @@ export default async function check(argv) {
           column: 0,
         });
       }
+    }
+  }
+
+  for (const filePath of files) {
+    if (filePath !== 'package.json' && !filePath.endsWith('/package.json')) continue;
+    let manifestText;
+    try {
+      manifestText = readFileSync(filePath, 'utf8');
+    } catch {
+      continue;
+    }
+    for (const finding of checkPackageManifest(manifestText)) {
+      diagnostics.push({
+        ruleId: 'package-gate',
+        severity: finding.verdict === 'block' ? 'error' : 'warning',
+        message: finding.reasons.join('; '),
+        filePath,
+        line: 0,
+        column: 0,
+      });
     }
   }
 

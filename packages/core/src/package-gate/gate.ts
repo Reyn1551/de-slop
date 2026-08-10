@@ -64,7 +64,7 @@ export interface ScriptFindings {
 }
 
 export function checkPackageManifest(manifestJson: string): ScriptFindings[] {
-  let manifest: { name?: string; scripts?: Record<string, string> };
+  let manifest: { name?: string; scripts?: Record<string, string>; dependencies?: Record<string, string> };
   try {
     manifest = JSON.parse(manifestJson);
   } catch {
@@ -73,6 +73,18 @@ export function checkPackageManifest(manifestJson: string): ScriptFindings[] {
 
   const findings: ScriptFindings[] = [];
   const scripts = manifest.scripts ?? {};
+
+  const deps = manifest.dependencies ?? {};
+  for (const depName of Object.keys(deps)) {
+    if (depName.startsWith('@types/')) {
+      findings.push({
+        name: depName,
+        script: '',
+        verdict: 'warn',
+        reasons: ['@types/* belongs in devDependencies, not dependencies — types are dev-time only'],
+      });
+    }
+  }
 
   for (const [name, script] of Object.entries(scripts)) {
     const matches = SUSPICIOUS_SCRIPT_PATTERNS.filter((pattern) => pattern.test(script));

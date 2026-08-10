@@ -435,6 +435,46 @@ describe('no-magic-string', () => {
   });
 });
 
+describe('no-hero-pill', () => {
+  it('flags hero-pill class pattern in JSX', () => {
+    const code = 'export function Hero() {\n  return <span className="hero-pill">New</span>;\n}\n';
+    const diags = scanSource(code, 'hero.tsx', { rules: ['no-hero-pill'] });
+    expect(diags.some((d) => d.ruleId === 'no-hero-pill')).toBe(true);
+  });
+
+  it('skips normal class names', () => {
+    const code = 'export function Btn() {\n  return <button className="btn-primary">Click</button>;\n}\n';
+    const diags = scanSource(code, 'btn.tsx', { rules: ['no-hero-pill'] });
+    expect(diags.some((d) => d.ruleId === 'no-hero-pill')).toBe(false);
+  });
+});
+
+describe('no-unsafe-innerhtml', () => {
+  it('flags dangerouslySetInnerHTML without DOMPurify', () => {
+    const code = 'function View({ text }: { text: string }) {\n  return <div dangerouslySetInnerHTML={{ __html: text }} />;\n}\n';
+    const diags = scanSource(code, 'view.tsx', { rules: ['no-unsafe-innerhtml'] });
+    expect(diags.some((d) => d.ruleId === 'no-unsafe-innerhtml')).toBe(true);
+  });
+
+  it('flags innerHTML assignment without sanitizer', () => {
+    const code = 'const el = document.getElementById("x");\nif (el) el.innerHTML = userInput;\n';
+    const diags = scanSource(code, 'xss.ts', { rules: ['no-unsafe-innerhtml'] });
+    expect(diags.some((d) => d.ruleId === 'no-unsafe-innerhtml')).toBe(true);
+  });
+
+  it('skips innerHTML when DOMPurify is imported', () => {
+    const code = 'import DOMPurify from "dompurify";\nconst el = document.getElementById("x");\nif (el) el.innerHTML = DOMPurify.sanitize(userInput);\n';
+    const diags = scanSource(code, 'clean.ts', { rules: ['no-unsafe-innerhtml'] });
+    expect(diags.some((d) => d.ruleId === 'no-unsafe-innerhtml')).toBe(false);
+  });
+
+  it('emits error severity', () => {
+    const code = 'const el = document.getElementById("x");\nif (el) el.innerHTML = userInput;\n';
+    const diags = scanSource(code, 'xss.ts', { rules: ['no-unsafe-innerhtml'] });
+    if (diags.length > 0) expect(diags[0].severity).toBe('error');
+  });
+});
+
 describe('applyFixes', () => {
   it('applies multiple fixes from end of file to start', () => {
     const code = '// increment the counter\ncounter++;\nfunction f() {\n  return 1;\n  const dead = 2;\n}\nf();\n';

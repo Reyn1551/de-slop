@@ -257,4 +257,16 @@ describe('agentGuardScan integration', () => {
     expect(diags[0].filePath).toBe('secret.ts');
     expect(diags[0].ruleId).toBe('no-secret-logging');
   });
+
+  it('flags Vite boilerplate README', () => {
+    const code = '# React + TypeScript + Vite\n\nThis template provides a minimal setup to get React working in Vite with HMR.\n';
+    const diags = agentGuardScan(code, 'README.md');
+    expect(diags.some((d) => d.ruleId === 'no-vite-boilerplate')).toBe(true);
+  });
+
+  it('skips Vite boilerplate on non-README docs', () => {
+    const code = 'This template provides a minimal setup.\n';
+    const diags = agentGuardScan(code, 'CHANGELOG.md');
+    expect(diags.some((d) => d.ruleId === 'no-vite-boilerplate')).toBe(false);
+  });
 });
