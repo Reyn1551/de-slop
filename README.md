@@ -18,7 +18,7 @@ npx de-slop intercept 'npm install <pkg>'   # cek package sebelum install (anti 
 |---|---|
 | `slop-scanner` | 17 rules AST linter untuk pola AI slop (redundant comment, dead code, unused var, hardcoded secret, injection risk, sycophancy, accept-all, missing docs, code bloat, debug logging, magic string, hero pill, unsafe innerHTML, dll) |
 | `agent-guard` | 6 rules keamanan agent-AI (invisible unicode, prompt injection, malicious pattern, secret logging, destructive command, unsafe install docs) |
-| `design-slop` | 9 rules UI/typography: deteksi desain khas AI (purple/indigo palette, gradient button/text, glassmorphism overload, glow shadow, blob animasi, grey-on-dark WCAG fail, pure #000 bg, font slop). Bundle scoring: >=4 pola co-occurrence = error (metode Krebs) |
+| `design-slop` | 11 rules UI/typography: deteksi desain khas AI (purple/indigo palette, gradient button/text, glassmorphism overload, glow shadow, blob animasi, grey-on-dark WCAG fail, pure #000 bg, font slop, hero pill, emoji-as-icon). Bundle scoring: >=4 pola co-occurrence = error (metode Krebs) |
 | `test-lock` | Kunci unit test via AST fingerprint sha256 — AI tidak bisa mengubah/melemahkan test diam-diam |
 | `spec-contractor` | Tegakkan kontrak spec-driven development (missing function + invariants) |
 | `package-gate` | Firewall anti-slopsquatting (validasi umur + downloads package sebelum install) |
