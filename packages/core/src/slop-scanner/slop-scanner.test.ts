@@ -447,6 +447,12 @@ describe('no-hero-pill', () => {
     const diags = scanSource(code, 'btn.tsx', { rules: ['no-hero-pill'] });
     expect(diags.some((d) => d.ruleId === 'no-hero-pill')).toBe(false);
   });
+
+  it('skips legit badge classes (preset-badge, quality-badge)', () => {
+    const code = 'export function Card() {\n  return <span className="preset-badge">Popular</span>;\n}\n';
+    const diags = scanSource(code, 'card.tsx', { rules: ['no-hero-pill'] });
+    expect(diags.some((d) => d.ruleId === 'no-hero-pill')).toBe(false);
+  });
 });
 
 describe('no-unsafe-innerhtml', () => {

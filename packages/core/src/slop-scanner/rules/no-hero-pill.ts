@@ -3,12 +3,10 @@ import type { Diagnostic, Rule } from '../types';
 
 const PILL_CLASS_PATTERNS = [
   /hero-pill/i,
-  /preset-badge/i,
-  /\b(hero|status|feature|new|beta|pill|badge)([-_])?pill\b/i,
-  /\b(badge|pill)[-_\s]*(badge|pill)\b/i,
+  /hero\s+pill/i,
+  /\b(real[-_]time|now[-_]live|live|beta|new|featured)\b[^"']*\bpill\b/i,
+  /pill[^"']*\b(real[-_]time|now[-_]live)\b/i,
 ];
-
-const HERO_EMOJI_WORDS = /\p{Extended_Pictographic}/u;
 
 export const noHeroPill: Rule = {
   id: 'no-hero-pill',
