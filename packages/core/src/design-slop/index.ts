@@ -9,6 +9,8 @@ import { noGradientBlob } from './rules/no-gradient-blob';
 import { noDarkGreyText } from './rules/no-dark-grey-text';
 import { noPureBlackBg } from './rules/no-pure-black-bg';
 import { noSlopFont } from './rules/no-slop-font';
+import { noHeroPill } from './rules/no-hero-pill';
+import { noEmojiAsIcon } from './rules/no-emoji-as-icon';
 
 export type { Diagnostic, DesignSlopOptions } from './types';
 
@@ -22,6 +24,8 @@ export const DESIGN_SLOP_RULES = {
   'no-dark-grey-text': noDarkGreyText,
   'no-pure-black-bg': noPureBlackBg,
   'no-slop-font': noSlopFont,
+  'no-hero-pill': noHeroPill,
+  'no-emoji-as-icon': noEmojiAsIcon,
 } as const;
 
 export type DesignSlopRuleId = keyof typeof DESIGN_SLOP_RULES;
@@ -32,7 +36,7 @@ export const DESIGN_SLOP_RULE_IDS = Object.keys(DESIGN_SLOP_RULES) as DesignSlop
 const BUNDLE_THRESHOLD = 4;
 const BUNDLE_RULE_ID = 'design-slop-bundle';
 
-// Static markers that supplement the 9 main rules for bundle detection only —
+// Static markers that supplement the main rules for bundle detection only —
 // never reported standalone (single marker = legit, e.g. Apple has FAQ + numbers).
 const BUNDLE_MARKERS = [
   /FAQ|Frequently asked questions/i,

@@ -55,7 +55,7 @@ export default function Hero() {
 const SLOP_CSS = `
 body {
   background: #000;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 .hero-title {
   background: linear-gradient(135deg, #a5b4fc, #6366f1, #c084fc);
@@ -74,8 +74,8 @@ body {
 // ---- tests ----
 
 describe('design-slop', () => {
-  it('exposes 9 rules', () => {
-    expect(DESIGN_SLOP_RULE_IDS).toHaveLength(9);
+  it('exposes 11 rules', () => {
+    expect(DESIGN_SLOP_RULE_IDS).toHaveLength(11);
   });
 
   it('detects purple palette + gradient as error', () => {
@@ -129,9 +129,49 @@ describe('design-slop', () => {
     expect(diags.some((d) => d.ruleId === 'no-pure-black-bg')).toBe(true);
   });
 
-  it('flags Inter single-font page', () => {
+  it('flags Inter single-font page (unquoted + fallback list)', () => {
     const diags = scanDesignSlop(SLOP_CSS, '/tmp/index.css');
     expect(diags.some((d) => d.ruleId === 'no-slop-font')).toBe(true);
+  });
+
+  it('flags hero pill badge above h1', () => {
+    const pill = `
+export default function Hero() {
+  return (
+    <section>
+      <Badge variant="glowing" className="px-4 py-1.5 text-xs font-mono tracking-wide uppercase">🚀 Inspired by Foo Workflow</Badge>
+      <h1 className="text-5xl font-black">Build the Future</h1>
+      <p>Subtext.</p>
+    </section>
+  );
+}`;
+    const diags = scanDesignSlop(pill, '/tmp/hero-pill.tsx');
+    const hit = diags.find((d) => d.ruleId === 'no-hero-pill');
+    expect(hit).toBeDefined();
+    expect(hit?.severity).toBe('warning');
+  });
+
+  it('flags emoji as icon in pill', () => {
+    const emoji = `
+export default function Feature() {
+  return (
+    <div className="rounded-full bg-cyan-500/10 px-3 py-1 text-xs">
+      🚀 Inspired by NgodingPakeAI Workflow
+    </div>
+  );
+}`;
+    const diags = scanDesignSlop(emoji, '/tmp/emoji.tsx');
+    expect(diags.some((d) => d.ruleId === 'no-emoji-as-icon')).toBe(true);
+  });
+
+  it('does not flag emoji in body copy', () => {
+    const body = `
+const content = "Tips for your team 🎉 — read the full guide below.";
+export default function Post() {
+  return <p>{content}</p>;
+}`;
+    const diags = scanDesignSlop(body, '/tmp/post.tsx');
+    expect(diags.some((d) => d.ruleId === 'no-emoji-as-icon')).toBe(false);
   });
 
   it('bundle: >=4 tells in one file => design-slop-bundle error', () => {

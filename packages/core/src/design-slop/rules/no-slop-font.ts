@@ -8,7 +8,8 @@ import { collectRegex, toColumn } from '../utils';
 // NOT flagged alone: Sora, Bricolage Grotesque, JetBrainsMono-as-code, Manrope, Poppins.
 // Allowlist escape: font-feature-settings present on the family, or a font token variable.
 
-const INTER_SINGLE = /font-family\s*:\s*['"]Inter['"]\s*,?\s*(?:'?sans-serif'?)?\s*;/g;
+// Matches `font-family: Inter, ...;` — Inter first in the list, quoted or not.
+const INTER_SINGLE = /font-family\s*:\s*['"]?Inter['"]?\s*,/gi;
 
 const DISPLAY_SLOP =
   /['"](?:Space\s+Grotesk|Geist|Instrument\s+Serif|Fraunces|Syne|DM\s+Sans)['"]/g;
