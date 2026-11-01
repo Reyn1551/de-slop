@@ -1,16 +1,19 @@
 name: de-slop
-description: Anti AI-slop checks — slop scan, test-lock, package-gate
-author: de-slop
+description: Anti AI-slop checks: slop scan, test-lock, package-gate, prose, accessibility, degradation
+author: Reyn1551
 branding:
   icon: shield
   color: red
 inputs:
   command:
-    description: Command to run (check | fix)
+    description: Command to run (check | fix | prose | budget | context | report)
     default: check
   paths:
-    description: Paths to scan
+    description: Space-separated paths to scan
     default: "."
+  strict:
+    description: Fail on warnings as well as errors
+    default: "false"
 runs:
   using: node20
   main: index.js
