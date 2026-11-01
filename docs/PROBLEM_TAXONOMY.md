@@ -84,6 +84,9 @@ replacement, placeholder-only labels, blocked pinch zoom, touch targets under
 `ux-guard` runs 12 rules over JSX, HTML, and CSS. These are provable failures
 (WCAG 2.2, Apple HIG, Material), not taste judgments.
 
+The counterpart is a DESIGN.md: the project writes down its colors, fonts, and
+radii, and `design-slop` stops flagging them. A declared purple is a decision.
+
 ## 10. Degradation across iterations
 
 SlopCodeBench (arXiv:2603.24755) measures what single-shot benchmarks hide: over
@@ -95,6 +98,15 @@ human repositories, and erosion rises in 77% of trajectories.
 (`mass = CC * sqrt(SLOC)`, share of mass in functions with CC > 10) and verbosity
 (`|flagged ∪ clone lines| / LOC`) — then compares a run against a stored
 baseline so a repo can fail when quality drops.
+
+## 11. Design drift
+
+A project declares its tokens in DESIGN.md and then outgrows them. A color used
+forty times never reaches the contract, so the document stops describing the
+product and a reviewer cannot tell a decision from an accident.
+
+`design-contract` parses the contract, exempts the values it declares, and
+reports values used repeatedly that it never declares.
 
 ## Severity policy
 

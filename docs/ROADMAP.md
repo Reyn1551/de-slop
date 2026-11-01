@@ -30,9 +30,11 @@
 - [x] `degradation`: SlopCodeBench erosion and verbosity, baseline compare
 - [x] `context-rot`: agent instruction files checked against the repo
 - [x] `package-gate`: typosquat verdict via Damerau-Levenshtein
+- [x] `design-contract`: DESIGN.md parser, exemptions, and drift detection
 - [x] `scanContent`: one detector fan-out shared by CLI, MCP, and action
-- [x] CLI `prose`, `budget`, `context`
-- [x] MCP `check_prose`, `check_ux`, `check_degradation`, `check_context_rot`
+- [x] CLI `prose`, `budget`, `context`; `--design-md` on `check`
+- [x] MCP `check_prose`, `check_ux`, `check_degradation`, `check_context_rot`,
+      `check_design_contract`
 
 ## v0.5: Correctness pass
 
@@ -56,6 +58,5 @@ positives that made the tool noisy on its own source.
 
 - [ ] Publish `@de-slop/cli` to npm
 - [ ] VS Code extension
-- [ ] Design contract (DESIGN.md) exemptions — design written, not built
 - [ ] `de-slop report` HTML output
 - [ ] Per-rule documentation pages

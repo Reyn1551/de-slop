@@ -4,6 +4,12 @@
 
 ### Added
 
+- `design-contract` module: DESIGN.md parser (colors, typography, radii,
+  omitted), walk-up resolver, exemption helpers, and drift detection for values
+  used repeatedly without a declared token. Color parsing accepts hex, `rgb()`,
+  `hsl()`, `oklch()`, and named colors, all normalized to sRGB.
+- `design-slop` exemptions: declared colors, palette families, and fonts stop
+  being flagged; the bundle threshold drops to 3 when no contract exists.
 - `prose-slop` module: 14 deterministic rules over documentation, code fences and
   URLs masked before analysis, per-document score with a bundle error at 25.
 - `ux-guard` module: 12 accessibility and interaction rules over JSX, HTML, and

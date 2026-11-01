@@ -20,7 +20,7 @@ Aturan ini mengikat semua agen AI yang bekerja di repo ini.
 
 ## Struktur
 
-`packages/core` menyimpan semua logika. 13 modul: `slop-scanner`, `runtime-guard`, `agent-guard`, `design-slop`, `ux-guard`, `prose-slop`, `context-rot`, `degradation`, `test-lock`, `package-gate`, `spec-contractor`, `circuit-breaker`, `ast-pruner`. Masing-masing punya test vitest di foldernya.
+`packages/core` menyimpan semua logika. 14 modul: `slop-scanner`, `runtime-guard`, `agent-guard`, `design-slop`, `design-contract`, `ux-guard`, `prose-slop`, `context-rot`, `degradation`, `test-lock`, `package-gate`, `spec-contractor`, `circuit-breaker`, `ast-pruner`. Masing-masing punya test vitest di foldernya.
 
 `packages/cli` (bin `de-slop`, ESM), `packages/mcp-server` (stdio MCP), dan `packages/action` adalah adapter tipis di atas core. Detector dipilih di satu tempat: `packages/core/src/scan.ts`.
 
@@ -44,7 +44,7 @@ Rule baru = satu file di `rules/` plus satu baris di registry `index.ts`. Id rul
 
 ```bash
 npm run build       # tsc core + mcp-server ke dist
-npm test            # vitest, 399 test
+npm test            # vitest, 437 test
 npm run typecheck   # tsc --noEmit core + mcp-server
 node packages/cli/bin/de-slop.js check .   # butuh build dulu
 ```

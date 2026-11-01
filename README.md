@@ -34,6 +34,7 @@ npx de-slop mcp           # stdio MCP server
 | `circuit-breaker` | Doom loops: repeated identical attempts, tool-call budget, diff-line budget | state machine |
 | `degradation` | Quality decay across iterations: structural erosion, verbosity, compared against a stored baseline | 2 metrics |
 | `ast-pruner` | Context rot from reading whole files: prunes to the declarations a query needs | pruner |
+| `design-contract` | Drift from a declared DESIGN.md: values used repeatedly but never declared, plus exemptions for tokens the project did choose | 3 dimensions |
 
 Severity policy: `error` is a provable defect (failing test, missing package,
 XSS, WCAG failure, chatbot residue in published docs). `warning` is a pattern
@@ -102,7 +103,7 @@ writes the client config.
 
 ```bash
 npm run build       # tsc core + mcp-server into dist
-npm test            # vitest, 399 tests
+npm test            # vitest, 437 tests
 npm run typecheck   # tsc --noEmit
 ```
 
