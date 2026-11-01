@@ -1,6 +1,6 @@
 {
   "name": "de-slop",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Anti AI-slop toolkit: test-lock, spec-contractor, slop-scanner, package-gate, circuit-breaker, runtime-guard",
   "workspaces": [

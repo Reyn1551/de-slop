@@ -1,5 +1,5 @@
 import { readdirSync, statSync } from 'node:fs';
-import { extname, join } from 'node:path';
+import { extname, join, resolve } from 'node:path';
 import { loadConfig } from './config.js';
 
 export const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.json', '.css']);
@@ -10,7 +10,14 @@ export function isSourceFile(filePath) {
   return SOURCE_EXTENSIONS.has(extname(filePath)) || DOC_EXTENSIONS.has(extname(filePath));
 }
 
-function walkDirectory(dir, files, excludes) {
+/** True when a path is the directory name itself or a relative path into it. */
+function isExcluded(relativePath, name, excludes) {
+  if (name.startsWith('.') || excludes.has(name) || EXCLUDED_FILES.has(name)) return true;
+  if (!relativePath.includes('/')) return false;
+  return excludes.has(relativePath);
+}
+
+function walkDirectory(dir, files, excludes, prefix) {
   let entries;
   try {
     entries = readdirSync(dir, { withFileTypes: true });
@@ -18,9 +25,10 @@ function walkDirectory(dir, files, excludes) {
     return;
   }
   for (const entry of entries) {
-    if (entry.name.startsWith('.') || excludes.has(entry.name) || EXCLUDED_FILES.has(entry.name)) continue;
+    const relativePath = prefix === '' ? entry.name : `${prefix}/${entry.name}`;
+    if (isExcluded(relativePath, entry.name, excludes)) continue;
     const fullPath = join(dir, entry.name);
-    if (entry.isDirectory()) walkDirectory(fullPath, files, excludes);
+    if (entry.isDirectory()) walkDirectory(fullPath, files, excludes, relativePath);
     else if (entry.isFile() && isSourceFile(fullPath)) files.push(fullPath);
   }
 }
@@ -42,7 +50,7 @@ export function findSourceFiles(paths) {
       continue;
     }
     if (stat.isFile()) files.push(input);
-    else if (stat.isDirectory()) walkDirectory(input, files, excludes);
+    else if (stat.isDirectory()) walkDirectory(resolve(input), files, excludes, '');
   }
   return { files, missing };
 }

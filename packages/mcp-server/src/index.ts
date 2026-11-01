@@ -146,7 +146,7 @@ function registerTools(server: McpServer): void {
 }
 
 export async function startMcpServer(): Promise<void> {
-  const server = new McpServer({ name: MCP_SERVER_NAME, version: '0.1.0' });
+  const server = new McpServer({ name: MCP_SERVER_NAME, version: '0.4.0' });
   registerTools(server);
   const transport = new StdioServerTransport();
   await server.connect(transport);

@@ -38,7 +38,7 @@ export function loadConfig(startDir = process.cwd()) {
   const budget = raw.budget !== null && typeof raw.budget === 'object' ? raw.budget : {};
 
   return {
-    exclude: [...DEFAULT_EXCLUDES, ...stringList(raw.exclude)],
+    exclude: [...new Set([...DEFAULT_EXCLUDES, ...stringList(raw.exclude)])],
     rules: stringList(raw.rules),
     strict: raw.strict === true,
     prose: stringList(raw.prose),

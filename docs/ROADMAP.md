@@ -1,34 +1,61 @@
 # Roadmap
 
-## v0.1 — Foundation
-- [x] Monorepo scaffold
-- [x] `slop-scanner` rules dasar (6 rules)
-- [x] CLI `init` + `check` + `fix` + `mcp` + `intercept`
-- [x] GitHub Action manifest (`packages/action/action.yml`)
-- [x] Build infra (TS7/tsgo, vitest, workspaces)
+## v0.1: Foundation
 
-## v0.2 — Protection
+- [x] Monorepo scaffold (TS7/tsgo, vitest, workspaces)
+- [x] `slop-scanner` AST rules + auto-fix
+- [x] CLI `init`, `check`, `fix`, `mcp`, `intercept`
+- [x] GitHub Action, node20 JS runtime
+
+## v0.2: Protection
+
 - [x] `test-lock` AST fingerprinting
-- [x] `package-gate` registry validation (npm/pypi)
+- [x] `package-gate` registry validation
 - [x] `runtime-guard` edge-case rules
-- [x] Pre-commit hooks (`de-slop init`)
-- [x] `circuit-breaker` untuk agent loops
-- [x] Templates distribusi (`de-slop init --ci --mcp` → GitHub Action workflow + Cursor/Claude MCP config)
+- [x] Pre-commit hook, AI co-author trailer block
+- [x] `circuit-breaker` budgets
+- [x] `spec-contractor`, `ast-pruner`
 
-## v0.3 — AI Integration
-- [x] MCP server + tools (check_slop, verify_tests, check_package, spec_verify)
-- [x] `spec-contractor` engine
-- [x] `ast-pruner` context compaction
-- [x] E2E tests penuh untuk MCP tools (SDK client, 4 tools)
-- [x] Behavioral rules: `no-sycophancy`, `no-accept-all`, `no-missing-docs` + gap rules `no-injection-risk`, `no-unresolved-import`, `no-generic-name` (total 12 rules)
-- [x] `agent-guard` module: 6 rules keamanan agent-AI (invisible unicode, prompt injection, malicious pattern, secret logging, destructive command, unsafe install docs)
-- [x] Test integrity +: `verifyAssertionQuality` (trivial assertion, flaky mock, happy-path-only)
-- [x] Supply chain +: `checkPackageManifest` (preinstall hook scan), `checkInstallScript` (block sudo/curl|sh/custom registry)
-- [x] Pre-commit hook block AI co-author trailers
+## v0.3: AI integration
+
+- [x] MCP server (stdio)
+- [x] `agent-guard`: 7 security rules
+- [x] `design-slop`: 11 rules + Krebs bundle verdict
+- [x] Assertion-quality checks, install-script scanning
+
+## v0.4: Depth
+
+- [x] `prose-slop`: 14 rules over documentation, 0-100 score, bundle error
+- [x] `ux-guard`: 12 WCAG 2.2 / HIG rules over JSX, HTML, CSS
+- [x] `degradation`: SlopCodeBench erosion and verbosity, baseline compare
+- [x] `context-rot`: agent instruction files checked against the repo
+- [x] `package-gate`: typosquat verdict via Damerau-Levenshtein
+- [x] `scanContent`: one detector fan-out shared by CLI, MCP, and action
+- [x] CLI `prose`, `budget`, `context`
+- [x] MCP `check_prose`, `check_ux`, `check_degradation`, `check_context_rot`
+
+## v0.5: Correctness pass
+
+Rule quality matters more than rule count. The work here removes false
+positives that made the tool noisy on its own source.
+
+- [x] `design-slop`: dark-grey text scoped to its dark region, not file-global
+- [x] `design-slop`: purple escalates only on a real gradient
+- [x] `design-slop`: gradient buttons scoped to button elements
+- [x] `design-slop`: blob animation checked per element
+- [x] `design-slop`: glassmorphism uses element and selector structure
+- [x] `design-slop`: single-font detection counts declared families
+- [x] `design-slop`: glow shadows excluded by class token
+- [x] `slop-scanner`: `no-hero-pill` renamed `no-pill-class-string` (id collision)
+- [x] `slop-scanner`: `no-missing-docs` limited to exported functions and classes
+- [x] `slop-scanner`: `no-magic-string` requires a real TLD, skips tests
+- [x] `runtime-guard`: exact nullable method names, declared async callees only
+- [x] Parser bridge: virtual FS slots wrap at 512
+
+## Next
+
+- [ ] Publish `@de-slop/cli` to npm
 - [ ] VS Code extension
-
-## v1.0 — Release
-- [ ] Publish `@de-slop/cli` ke npm
-- [x] GitHub Action runtime (node20 JS action real, self-contained, auto-build)
-- [x] Integrasi install intercept (`de-slop intercept`, CLI wrapper di atas `package-gate`)
-- [ ] Dokumentasi publik lengkap
+- [ ] Design contract (DESIGN.md) exemptions — design written, not built
+- [ ] `de-slop report` HTML output
+- [ ] Per-rule documentation pages

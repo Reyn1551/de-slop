@@ -1,6 +1,6 @@
 {
   "name": "@de-slop/core",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "Anti AI-slop analysis engine: AST slop scanner, test-lock, spec-contractor, package-gate, circuit-breaker, runtime-guard, agent-guard",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,0 +1,75 @@
+# Changelog
+
+## 0.4.0 (2026-11-01)
+
+### Added
+
+- `prose-slop` module: 14 deterministic rules over documentation, code fences and
+  URLs masked before analysis, per-document score with a bundle error at 25.
+- `ux-guard` module: 12 accessibility and interaction rules over JSX, HTML, and
+  CSS, each tied to a WCAG 2.2 or Apple HIG threshold.
+- `degradation` module: SlopCodeBench structural erosion and verbosity, baseline
+  save/load/compare against the published human means (0.34, 0.19).
+- `context-rot` module: agent instruction files checked against repo facts, after
+  arXiv:2606.09090 which found stale references in 23% of sampled repositories.
+- `package-gate` typosquat verdict: Damerau-Levenshtein against a curated corpus
+  of 100 npm and 60 PyPI names, plus separator and scope tricks.
+- `scanContent` in core: one detector fan-out by file extension, shared by the
+  CLI, the MCP server, and the action.
+- CLI commands `prose`, `budget`, `context`.
+- MCP tools `check_prose`, `check_ux`, `check_degradation`, `check_context_rot`
+  (8 tools total).
+- `.desloprc.json` fields `rules`, `prose`, `ux`, `strict`, `budget`; the CLI
+  reads all of them.
+
+### Changed
+
+- `check` now scans documentation and markup, not only code.
+- `check --strict` fails on warnings; config `strict` does the same.
+- `no-hero-pill` in slop-scanner renamed `no-pill-class-string` to end the id
+  collision with the structural design-slop rule.
+- `no-missing-docs` asks only for exported functions and classes.
+- `no-magic-string` requires a real TLD and skips test files.
+- `no-debug-logging` skips CLI output paths.
+- `no-over-wrapper` skips inline callbacks.
+- `no-unhandled-null` matches exact nullable method names.
+- `no-floating-promise` requires a declared async callee.
+- `no-dark-grey-text` scopes the grey text to its dark region.
+- `no-ai-purple` escalates only on a real gradient.
+- `no-gradient-button` scopes recipes to button elements.
+- `no-gradient-blob` checks animation per element.
+- `no-glassmorphism` uses element and selector structure, and catches Tailwind
+  form controls.
+- `no-slop-font` counts declared families before calling a page single-font.
+- `no-glow-shadow` excludes focus rings by class token.
+- Parser bridge reuses virtual FS slots in a ring of 512.
+
+### Fixed
+
+- `test-lock` e2e wrote to the repository store instead of a temp path.
+- `exclude` entries in `.desloprc.json` now match repo-relative paths, not only
+  directory names.
+
+## 0.3.0
+
+### Added
+
+- `agent-guard`: 7 rules for agent security.
+- `design-slop`: 11 rules plus a Krebs co-occurrence bundle verdict.
+- Assertion-quality checks in `test-lock`.
+- Install-script scanning in `package-gate`.
+- MCP server with 4 tools.
+
+## 0.2.0
+
+### Added
+
+- `test-lock`, `package-gate`, `runtime-guard`, `circuit-breaker`,
+  `spec-contractor`, `ast-pruner`.
+- Pre-commit hook that blocks AI co-author trailers.
+
+## 0.1.0
+
+### Added
+
+- `slop-scanner` with 6 rules, CLI `init`/`check`/`fix`, GitHub Action.
