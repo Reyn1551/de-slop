@@ -25,6 +25,7 @@ npx de-slop mcp           # stdio MCP server
 | `runtime-guard` | Unhandled promises, missing cleanup for timers and listeners, unguarded null access | 4 |
 | `agent-guard` | Prompt injection, invisible unicode, secret logging, destructive commands, unsafe install instructions | 7 |
 | `design-slop` | AI design tells: indigo-to-purple gradients, glass on every surface, glow shadows, gradient blobs, hero pills, emoji icons, single-font pages, grey-on-dark contrast | 11 |
+| `design-contract` | Drift from a declared DESIGN.md: values used repeatedly but never declared, plus exemptions for tokens the project did choose | 3 dimensions |
 | `ux-guard` | Provable accessibility failures: missing alt text, unlabeled icon buttons, removed focus rings, placeholder-only labels, blocked zoom, 44px touch targets, motion without reduced-motion, off-grid spacing | 12 |
 | `prose-slop` | AI writing tells: not-X-but-Y contrasts, staged openers, chatbot residue, inflated significance, fake depth, sales language, AI vocabulary, dash overload, bold-label lists, closers | 14 |
 | `context-rot` | Agent instructions pointing at files, symbols, or scripts that no longer exist | 4 |
@@ -34,7 +35,6 @@ npx de-slop mcp           # stdio MCP server
 | `circuit-breaker` | Doom loops: repeated identical attempts, tool-call budget, diff-line budget | state machine |
 | `degradation` | Quality decay across iterations: structural erosion, verbosity, compared against a stored baseline | 2 metrics |
 | `ast-pruner` | Context rot from reading whole files: prunes to the declarations a query needs | pruner |
-| `design-contract` | Drift from a declared DESIGN.md: values used repeatedly but never declared, plus exemptions for tokens the project did choose | 3 dimensions |
 
 Severity policy: `error` is a provable defect (failing test, missing package,
 XSS, WCAG failure, chatbot residue in published docs). `warning` is a pattern
@@ -83,7 +83,7 @@ directory name or a repo-relative path.
 }
 ```
 
-Tools: `check_slop`, `check_prose`, `check_ux`, `check_degradation`,
+Nine tools: `check_slop`, `check_prose`, `check_ux`, `check_degradation`,
 `check_context_rot`, `check_design_contract`, `verify_tests`, `check_package`,
 `spec_verify`. `check_slop` runs every detector and picks them by file extension.
 

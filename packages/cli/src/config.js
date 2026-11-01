@@ -5,9 +5,9 @@ export const CONFIG_FILE = '.desloprc.json';
 
 const DEFAULT_EXCLUDES = ['node_modules', 'dist', '.git'];
 
-function stringList(value) {
-  if (!Array.isArray(value)) return [];
-  return value.filter((entry) => typeof entry === 'string' && entry.length > 0);
+function stringList(candidate) {
+  if (!Array.isArray(candidate)) return [];
+  return candidate.filter((entry) => typeof entry === 'string' && entry.length > 0);
 }
 
 function readConfig(startDir) {

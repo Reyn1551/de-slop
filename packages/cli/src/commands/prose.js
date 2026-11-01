@@ -67,10 +67,10 @@ export default async function prose(argv) {
     return errors > 0 ? 1 : 0;
   }
 
-  for (const result of results) {
-    const { words, sentences, score } = result.metrics;
-    console.log(`${result.filePath} — score ${score}/100 (${words} words, ${sentences} sentences)`);
-    for (const diagnostic of result.diagnostics) {
+  for (const document of results) {
+    const { words, sentences, score } = document.metrics;
+    console.log(`${document.filePath} — score ${score}/100 (${words} words, ${sentences} sentences)`);
+    for (const diagnostic of document.diagnostics) {
       console.log(
         `  ${diagnostic.filePath}:${diagnostic.line}:${diagnostic.column} ${diagnostic.severity} ${diagnostic.ruleId} ${diagnostic.message}`,
       );

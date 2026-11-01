@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { analyzeProject, checkPackages, HUMAN_EROSION_BASELINE, HUMAN_VERBOSITY_BASELINE } from '@de-slop/core';
 import { verifyTestFile } from '@de-slop/core/test-lock';
@@ -191,30 +191,23 @@ export default async function report(argv) {
   }
 
   let packageReports = [];
-  let pkgSource = null;
-  try {
-    pkgSource = readFileSync(join(target, 'package.json'), 'utf8');
-  } catch {
-    // no package.json — skip package gate
-  }
+  const manifestPath = join(target, 'package.json');
+  const pkgSource = existsSync(manifestPath) ? readFileSync(manifestPath, 'utf8') : null;
   if (pkgSource !== null) {
     try {
       const deps = parseDeps(pkgSource);
       packageReports = await checkPackages(deps.map((d) => d.name));
       packageReports = packageReports.map((r, i) => ({ ...r, version: deps[i]?.version ?? '' }));
-    } catch {
-      // registry unreachable — report stays empty rather than failing the audit
+    } catch (err) {
+      console.error(`de-slop report: registry check skipped (${err.message})`);
     }
   }
 
   let specResults = [];
   const specPath = join(target, 'de-slop.spec.yml');
-  try {
-    readFileSync(specPath, 'utf8');
+  if (existsSync(specPath)) {
     const { runSpecCheck } = await import('@de-slop/core/spec-contractor');
     specResults = await runSpecCheck(specPath, [`${target}/**/*.ts`]);
-  } catch {
-    // no spec file — skip
   }
 
   const sources = [];
