@@ -18,6 +18,13 @@ function paramName(parameter: ParameterDeclaration): string | undefined {
 function isPureForwarder(node: WrapperCandidate): boolean {
   const parameters = node.parameters;
   if (!parameters || parameters.some((parameter) => paramName(parameter) === undefined)) return false;
+  // An inline callback is a signature adapter, which is the point: `map` needs
+  // one argument, `String` takes one, so `(value) => String(value)` is not a
+  // wrapper to delete.
+  const parent = node.parent;
+  if (ast.isCallExpression(parent) && parent.arguments.some((argument) => argument.pos === node.pos)) {
+    return false;
+  }
   const body = node.body;
   if (!body) return false;
   let call: CallExpression | undefined;

@@ -31,6 +31,11 @@ export const noPillClassString: Rule = {
     }
 
     function visit(node: Node): void {
+      // Module specifiers name files, not class strings.
+      if (ast.isImportDeclaration(node) || ast.isExportDeclaration(node) || ast.isImportEqualsDeclaration(node)) {
+        return;
+      }
+
       if (ast.isStringLiteral(node) || ast.isNoSubstitutionTemplateLiteral(node)) {
         if (PILL_CLASS_PATTERNS.some((pattern) => pattern.test(node.text))) report(node);
       }

@@ -17,7 +17,8 @@
     "./design-slop": "./dist/design-slop/index.js",
     "./prose-slop": "./dist/prose-slop/index.js",
     "./ux-guard": "./dist/ux-guard/index.js",
-    "./degradation": "./dist/degradation/index.js"
+    "./degradation": "./dist/degradation/index.js",
+    "./context-rot": "./dist/context-rot/index.js"
   },
   "files": [
     "dist"

@@ -14,6 +14,12 @@ let sharedApi: InstanceType<typeof sync.API> | undefined;
 let sharedFs: FileSystem | undefined;
 let nextFileSlot = 0;
 
+// The virtual FS keeps every file ever written. An MCP server stays up for a
+// whole session and scans thousands of files, so the slots wrap: each parse
+// reuses one of a fixed set of paths. A SourceFile materializes its text when
+// it is created, so overwriting an old slot cannot corrupt an earlier result.
+const MAX_SLOTS = 512;
+
 function getApi(): InstanceType<typeof sync.API> {
   if (!sharedApi) {
     sharedFs = fs.createVirtualFileSystem({});
@@ -24,7 +30,8 @@ function getApi(): InstanceType<typeof sync.API> {
 
 export function parseSourceFile(code: string, filePath: string): SourceFile {
   const api = getApi();
-  const absolutePath = `/slop-scan/${nextFileSlot++}/${filePath.replace(/^\/+/, '')}`;
+  const slot = nextFileSlot++ % MAX_SLOTS;
+  const absolutePath = `/slop-scan/${slot}/${filePath.replace(/^\/+/, '')}`;
   sharedFs!.writeFile!(absolutePath, code);
   const uri = `file://${absolutePath}`;
   const snapshot = api.updateSnapshot({ openFiles: [{ uri }] });

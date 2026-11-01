@@ -4,6 +4,11 @@ import type { Diagnostic, Rule, RuleContext } from '../types';
 const DEBUG_METHODS = new Set(['log', 'warn', 'info']);
 const MIN_OCCURRENCES = 3;
 
+// A CLI prints its results with console.log; that is the product, not debug
+// residue. The rule targets libraries and app code, where console output is
+// almost always a leftover.
+const CLI_PATH = /(?:^|\/)(?:bin|commands)\/|(?:^|\/)cli\.[cm]?[jt]sx?$/;
+
 function isTestFile(context?: RuleContext): boolean {
   if (!context) return false;
   const fileName = context.filePath.split('/').pop() ?? '';
@@ -33,6 +38,7 @@ export const noDebugLogging: Rule = {
   check(sourceFile, context) {
     const findings: Omit<Diagnostic, 'filePath' | 'ruleId'>[] = [];
     if (isTestFile(context)) return findings;
+    if (context && CLI_PATH.test(context.filePath)) return findings;
 
     const calls = collectConsoleCalls(sourceFile);
     if (calls.length < MIN_OCCURRENCES) return findings;

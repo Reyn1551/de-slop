@@ -1,16 +1,25 @@
 import { ast, type Node, type SourceFile } from '../../slop-scanner/ts-api';
 import type { Diagnostic, Rule } from '../../slop-scanner/types';
 
-const NULLABLE_CALLS = /find|findLast|pop|shift|querySelector|getElementById/;
+// Exact names only. A substring match turned `findSourceFiles(...).files` into
+// an unguarded null access because the helper name contains "find".
+const NULLABLE_METHODS: Record<string, true> = {
+  find: true,
+  findLast: true,
+  pop: true,
+  shift: true,
+  querySelector: true,
+  getElementById: true,
+};
 
 function nullableCallExpression(node: Node): boolean {
   if (!ast.isCallExpression(node)) return false;
   const callee = node.expression;
   if (ast.isPropertyAccessExpression(callee)) {
-    return NULLABLE_CALLS.test(callee.name.text);
+    return NULLABLE_METHODS[callee.name.text] === true;
   }
   if (ast.isIdentifier(callee)) {
-    return NULLABLE_CALLS.test(callee.text);
+    return NULLABLE_METHODS[callee.text] === true;
   }
   return false;
 }

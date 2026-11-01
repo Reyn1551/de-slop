@@ -112,6 +112,22 @@ function registerTools(server: McpServer): void {
   );
 
   server.tool(
+    'check_context_rot',
+    'Check an agent instruction file (AGENTS.md, CLAUDE.md, .cursorrules) against the repo: stale file paths, symbols, and npm scripts that no longer exist (context rot, arXiv:2606.09090)',
+    {
+      content: z.string().describe('Instruction file content'),
+      path: z.string().describe('Instruction file path, e.g. AGENTS.md'),
+      files: z.array(z.object({ filePath: z.string(), code: z.string() })).describe('Repository files used to build the fact set'),
+      packageJson: z.string().optional().describe('package.json content, for script checks'),
+    },
+    async ({ content, path, files, packageJson }) => {
+      const { collectRepoFacts, scanContextRot } = await import('@de-slop/core/context-rot');
+      const facts = collectRepoFacts(files, packageJson);
+      return textResult({ diagnostics: scanContextRot(content, path, facts) });
+    },
+  );
+
+  server.tool(
     'check_degradation',
     'Measure code degradation: structural erosion (complexity mass in functions above cyclomatic 10) and verbosity (flagged plus duplicate lines), against the SlopCodeBench human baselines of 0.34 and 0.19',
     {

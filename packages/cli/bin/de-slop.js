@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const COMMANDS = ['init', 'check', 'fix', 'mcp', 'intercept', 'report', 'prose', 'budget'];
+const COMMANDS = ['init', 'check', 'fix', 'mcp', 'intercept', 'report', 'prose', 'budget', 'context'];
 
 function cliVersion() {
   const packageJson = fileURLToPath(new URL('../package.json', import.meta.url));
@@ -20,6 +20,7 @@ Commands:
   fix        Rewrite the fixable findings in place
   prose      Score documents for AI writing tells
   budget     Measure erosion and verbosity against a baseline
+  context    Check agent instruction files against the repo
   intercept  Check packages before install (anti slopsquatting)
   report     Run every guardrail and write REPORT.md + report.json
   mcp        Start the MCP server for Cursor and [CC]

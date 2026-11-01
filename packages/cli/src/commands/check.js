@@ -1,9 +1,15 @@
 import { readFileSync } from 'node:fs';
-import { verifyTestFile, checkPackageManifest } from '@de-slop/core';
+import {
+  verifyTestFile,
+  checkPackageManifest,
+  scanContent,
+  scanContextRot,
+  collectRepoFacts,
+  isAgentConfig,
+} from '@de-slop/core';
 import { parseArgs } from '../args.js';
 import { loadConfig } from '../config.js';
 import { findSourceFiles } from '../files.js';
-import { scanFile } from '../scan.js';
 
 export const help = `de-slop check — scan code, markup, and docs for AI slop
 
@@ -61,8 +67,33 @@ export default async function check(argv) {
   }
 
   const diagnostics = [];
+  const sources = [];
   for (const filePath of files) {
-    diagnostics.push(...scanFile(filePath, rules));
+    let code;
+    try {
+      code = readFileSync(filePath, 'utf8');
+    } catch (err) {
+      diagnostics.push({
+        ruleId: 'scan-error',
+        severity: 'error',
+        message: err.message,
+        filePath,
+        line: 0,
+        column: 0,
+      });
+      continue;
+    }
+    sources.push({ filePath, code });
+    diagnostics.push(...scanContent(code, filePath, rules ? { rules } : {}));
+  }
+
+  const agentConfigs = sources.filter((source) => isAgentConfig(source.filePath));
+  if (agentConfigs.length > 0) {
+    const packageJson = sources.find((source) => source.filePath.endsWith('package.json'))?.code;
+    const facts = collectRepoFacts(sources, packageJson);
+    for (const config of agentConfigs) {
+      diagnostics.push(...scanContextRot(config.code, config.filePath, facts, rules ? { rules } : {}));
+    }
   }
 
   if (options.lock && (rules === undefined || rules.includes('test-lock'))) {

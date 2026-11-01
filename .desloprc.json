@@ -1,0 +1,13 @@
+{
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests/fixtures"
+  ],
+  "strict": false,
+  "budget": {
+    "tolerance": 0.02,
+    "ceiling": false,
+    "baseline": ".de-slop/baseline.json"
+  }
+}

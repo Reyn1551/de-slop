@@ -1,6 +1,11 @@
 import { ast, type SourceFile, type Node } from '../ts-api';
 import type { Diagnostic, Rule } from '../types';
 
+// An exported function or class without a JSDoc block. Types, interfaces, and
+// exported constants are excluded: their signature already documents them, and
+// demanding a comment above every `export interface Foo {` produces exactly the
+// redundant comment this project exists to remove.
+
 function hasJSDoc(node: Node, text: string): boolean {
   for (const range of ast.getLeadingCommentRanges(text, node.getFullStart()) ?? []) {
     if (range.kind === ast.SyntaxKind.MultiLineCommentTrivia) {
@@ -22,74 +27,39 @@ function isExported(node: Node): boolean {
   return false;
 }
 
+function report(
+  findings: Omit<Diagnostic, 'filePath' | 'ruleId'>[],
+  sourceFile: SourceFile,
+  node: Node,
+  kind: string,
+  name: string,
+): void {
+  const position = sourceFile.getLineAndCharacterOfPosition(node.getStart());
+  findings.push({
+    severity: 'warning',
+    message: `Exported ${kind} '${name}' has no JSDoc comment`,
+    line: position.line + 1,
+    column: position.character + 1,
+  });
+}
+
 export const noMissingDocs: Rule = {
   id: 'no-missing-docs',
   check(sourceFile) {
     const findings: Omit<Diagnostic, 'filePath' | 'ruleId'>[] = [];
     const text = sourceFile.text;
 
-    function visit(node: Node): void {
-      if (ast.isSourceFile(node)) {
-        for (const statement of node.statements) {
-          if (ast.isFunctionDeclaration(statement) && isExported(statement) && !hasJSDoc(statement, text)) {
-            const name = statement.name?.text ?? 'anonymous';
-            const position = sourceFile.getLineAndCharacterOfPosition(statement.getStart());
-            findings.push({
-              severity: 'warning',
-              message: `Exported function '${name}' has no JSDoc comment`,
-              line: position.line + 1,
-              column: position.character + 1,
-            });
-          }
-          if (ast.isClassDeclaration(statement) && isExported(statement) && !hasJSDoc(statement, text)) {
-            const name = statement.name?.text ?? 'anonymous';
-            const position = sourceFile.getLineAndCharacterOfPosition(statement.getStart());
-            findings.push({
-              severity: 'warning',
-              message: `Exported class '${name}' has no JSDoc comment`,
-              line: position.line + 1,
-              column: position.character + 1,
-            });
-          }
-          if (ast.isVariableStatement(statement) && isExported(statement)) {
-            for (const decl of statement.declarationList.declarations) {
-              if (!hasJSDoc(decl, text)) {
-                const name = decl.name.getText(sourceFile);
-                const position = sourceFile.getLineAndCharacterOfPosition(decl.getStart());
-                findings.push({
-                  severity: 'warning',
-                  message: `Exported variable '${name}' has no JSDoc comment`,
-                  line: position.line + 1,
-                  column: position.character + 1,
-                });
-              }
-            }
-          }
-          if (ast.isInterfaceDeclaration(statement) && isExported(statement) && !hasJSDoc(statement, text)) {
-            const name = statement.name?.text ?? 'anonymous';
-            const position = sourceFile.getLineAndCharacterOfPosition(statement.getStart());
-            findings.push({
-              severity: 'warning',
-              message: `Exported interface '${name}' has no JSDoc comment`,
-              line: position.line + 1,
-              column: position.character + 1,
-            });
-          }
-          if (ast.isTypeAliasDeclaration(statement) && isExported(statement) && !hasJSDoc(statement, text)) {
-            const name = statement.name?.text ?? 'anonymous';
-            const position = sourceFile.getLineAndCharacterOfPosition(statement.getStart());
-            findings.push({
-              severity: 'warning',
-              message: `Exported type '${name}' has no JSDoc comment`,
-              line: position.line + 1,
-              column: position.character + 1,
-            });
-          }
-        }
+    for (const statement of sourceFile.statements) {
+      if (!isExported(statement)) continue;
+      if (hasJSDoc(statement, text)) continue;
+
+      if (ast.isFunctionDeclaration(statement)) {
+        report(findings, sourceFile, statement, 'function', statement.name?.text ?? 'anonymous');
+      } else if (ast.isClassDeclaration(statement)) {
+        report(findings, sourceFile, statement, 'class', statement.name?.text ?? 'anonymous');
       }
-      node.forEachChild(visit);
     }
-    visit(sourceFile);
+
     return findings;
   },
 };

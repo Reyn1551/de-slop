@@ -112,11 +112,12 @@ describe('cli e2e', () => {
     writeFileSync(testFile, original);
 
     const { lockTestFile, verifyTestFile } = await import('@de-slop/core/test-lock');
-    await lockTestFile(testFile);
+    const store = join(dir, 'test-lock.json');
+    await lockTestFile(testFile, store);
 
     const weakened = original.replace('expect(count).toBe(1)', 'expect(count).toBe(2)');
     writeFileSync(testFile, weakened);
-    const violations = await verifyTestFile(testFile);
+    const violations = await verifyTestFile(testFile, store);
     expect(violations.some((v: any) => v.type === 'assertion-weakened' || v.type === 'assertion-removed')).toBe(true);
     rmSync(dir, { recursive: true, force: true });
   });
