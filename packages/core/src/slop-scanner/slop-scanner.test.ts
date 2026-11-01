@@ -189,6 +189,21 @@ describe('no-hardcoded-secret', () => {
     expect(ids('const password = "Sup3rSecret99";\nconsole.log(password);\n')).toContain('no-hardcoded-secret');
   });
 
+  it('skips a test file that holds a fake secret on purpose', () => {
+    const code = 'const apiKey = "sk-live-abcdef";\n';
+    expect(ids(code, 'src/config.test.ts')).not.toContain('no-hardcoded-secret');
+  });
+
+  it('still flags a fixture, which exists to be reported', () => {
+    const code = 'const apiKey = "sk-live-abcdef";\n';
+    expect(ids(code, 'tests/fixtures/config.ts')).toContain('no-hardcoded-secret');
+  });
+
+  it('still flags a secret in ordinary source', () => {
+    const code = 'const apiKey = "sk-live-abcdef";\n';
+    expect(ids(code, 'src/config.ts')).toContain('no-hardcoded-secret');
+  });
+
   it('ignores placeholders, env refs and short strings', () => {
     const code =
       'const apiKey = "your-api-key";\n' +

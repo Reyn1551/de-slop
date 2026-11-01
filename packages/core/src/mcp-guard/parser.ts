@@ -28,15 +28,15 @@ interface RawServer {
   alwaysAllow?: unknown;
 }
 
-function stringArray(value: unknown): string[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  return value.filter((entry): entry is string => typeof entry === 'string');
+function stringArray(candidate: unknown): string[] | undefined {
+  if (!Array.isArray(candidate)) return undefined;
+  return candidate.filter((entry): entry is string => typeof entry === 'string');
 }
 
-function stringRecord(value: unknown): Record<string, string> | undefined {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) return undefined;
+function stringRecord(candidate: unknown): Record<string, string> | undefined {
+  if (candidate === null || typeof candidate !== 'object' || Array.isArray(candidate)) return undefined;
   const record: Record<string, string> = {};
-  for (const [key, entry] of Object.entries(value)) {
+  for (const [key, entry] of Object.entries(candidate)) {
     if (typeof entry === 'string') record[key] = entry;
   }
   return record;
