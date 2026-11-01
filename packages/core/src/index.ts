@@ -41,6 +41,8 @@ export * as uxGuard from './ux-guard';
 export { scanUx, UX_RULES, UX_RULE_IDS } from './ux-guard';
 export { scanContent } from './scan';
 export type { ScanContentOptions } from './scan';
+export { RULES_CATALOG, RULE_MODULE_ORDER, findRule, rulesByModule } from './rules-catalog';
+export type { RuleDoc, RuleModule } from './rules-catalog';
 export * as reportHtml from './report';
 export { htmlReport, escapeHtml } from './report';
 export type { ReportData } from './report';

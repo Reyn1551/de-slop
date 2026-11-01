@@ -163,6 +163,35 @@ describe('cli e2e', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
+  it('rules lists the catalog and regenerates the reference', () => {
+    const listed = runCli(['rules', '--module', 'mcp-guard']);
+    expect(listed.status).toBe(0);
+    expect(listed.stdout).toContain('no-plaintext-remote');
+
+    const json = runCli(['rules', '--json']);
+    expect(json.status).toBe(0);
+    expect(JSON.parse(json.stdout).length).toBeGreaterThan(5);
+
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-rules-'));
+    const target = join(dir, 'RULES.md');
+    const written = runCli(['rules', '--write', target]);
+    expect(written.status).toBe(0);
+    const markdown = readFileSync(target, 'utf8');
+    expect(markdown).toContain('# Rule reference');
+    expect(markdown).toContain('`no-chatbot-residue`');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('keeps docs/RULES.md in sync with the catalog', () => {
+    const reference = join(root, 'docs/RULES.md');
+    const before = readFileSync(reference, 'utf8');
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-rulesync-'));
+    const regenerated = join(dir, 'RULES.md');
+    runCli(['rules', '--write', regenerated]);
+    expect(readFileSync(regenerated, 'utf8')).toBe(before);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
   it('check --strict fails on warnings only', () => {
     const dir = mkdtempSync(join(tmpdir(), 'deslop-strict-'));
     const file = join(dir, 'noise.ts');
