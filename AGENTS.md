@@ -20,11 +20,11 @@ Aturan ini mengikat semua agen AI yang bekerja di repo ini.
 
 ## Struktur
 
-`packages/core` menyimpan semua logika. 14 modul: `slop-scanner`, `runtime-guard`, `agent-guard`, `design-slop`, `design-contract`, `ux-guard`, `prose-slop`, `context-rot`, `degradation`, `test-lock`, `package-gate`, `spec-contractor`, `circuit-breaker`, `ast-pruner`. Masing-masing punya test vitest di foldernya.
+`packages/core` menyimpan semua logika. 15 modul: `slop-scanner`, `runtime-guard`, `agent-guard`, `design-slop`, `design-contract`, `ux-guard`, `prose-slop`, `context-rot`, `mcp-guard`, `degradation`, `test-lock`, `package-gate`, `spec-contractor`, `circuit-breaker`, `ast-pruner`. Masing-masing punya test vitest di foldernya.
 
-`packages/cli` (bin `de-slop`, ESM), `packages/mcp-server` (stdio MCP), dan `packages/action` adalah adapter tipis di atas core. Detector dipilih di satu tempat: `packages/core/src/scan.ts`.
+`packages/cli` (bin `de-slop`, ESM), `packages/mcp-server` (stdio MCP), `packages/action`, dan `packages/vscode-extension` adalah adapter tipis di atas core. Detector dipilih di satu tempat: `packages/core/src/scan.ts`.
 
-Rule baru = satu file di `rules/` plus satu baris di registry `index.ts`. Id rule dipakai sebagai filter `--rules` dan kunci tabel laporan, jadi harus unik lintas modul.
+Rule baru = satu file di `rules/`, satu baris di registry `index.ts`, dan satu entri di `packages/core/src/rules-catalog.ts`. Test gagal kalau entri katalog hilang atau basi. Id rule dipakai sebagai filter `--rules` dan kunci tabel laporan, jadi harus unik lintas modul.
 
 ## Parser: pahami sebelum menyentuh AST
 
@@ -44,7 +44,7 @@ Rule baru = satu file di `rules/` plus satu baris di registry `index.ts`. Id rul
 
 ```bash
 npm run build       # tsc core + mcp-server ke dist
-npm test            # vitest, 443 test
+npm test            # vitest, 501 test
 npm run typecheck   # tsc --noEmit core + mcp-server
 node packages/cli/bin/de-slop.js check .   # butuh build dulu
 ```

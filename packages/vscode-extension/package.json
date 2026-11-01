@@ -1,0 +1,68 @@
+{
+  "name": "de-slop-vscode",
+  "displayName": "de-slop",
+  "description": "Anti AI-slop diagnostics in the editor: code slop, accessibility, prose, agent instructions, and MCP configs",
+  "version": "0.6.0",
+  "publisher": "Reyn1551",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Reyn1551/de-slop"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "lint",
+    "ai",
+    "slop",
+    "accessibility",
+    "prose"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "de-slop.scanFile",
+        "title": "de-slop: Scan current file"
+      },
+      {
+        "command": "de-slop.scanWorkspace",
+        "title": "de-slop: Scan workspace"
+      }
+    ],
+    "configuration": {
+      "title": "de-slop",
+      "properties": {
+        "de-slop.scanOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Scan a file with de-slop when it is saved."
+        },
+        "de-slop.scanOnType": {
+          "type": "boolean",
+          "default": false,
+          "description": "Scan while typing. Off by default: the scanner parses an AST on every change."
+        },
+        "de-slop.checkAgentInstructions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Check agent instruction files (AGENTS.md, CLAUDE.md, .cursorrules) against the workspace for stale paths, symbols, and scripts. Reads source files once and caches the result."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "test": "node --test test/lint.test.js"
+  },
+  "dependencies": {
+    "@de-slop/core": "*"
+  }
+}

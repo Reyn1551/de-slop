@@ -8,7 +8,7 @@
 
 de-slop flags design patterns (purple palette, Inter font, glow shadows, gradients) as
 AI slop. But these are only *tells* when they are AI defaults chosen without intent. Real
-products with a design system — shadcn/ui, anime.js, 21st.dev, typeui.sh — deliberately
+products with a design system (shadcn/ui, anime.js, 21st.dev, typeui.sh) deliberately
 use some of these patterns (blue-600, Inter, glow components, FAQ accordions) and read as
 *human* because the choice is declared and consistent.
 
@@ -45,7 +45,7 @@ export interface DesignContract {
 }
 ```
 
-**`parser.ts`** — `parseDesignContract(code, path): DesignContract | Error`
+**`parser.ts`**: `parseDesignContract(code, path): DesignContract | Error`
 - Extract `---` YAML frontmatter block.
 - Hand-rolled subset: top-level keys `version`, `colors`, `typography`, `rounded`, `omitted`.
 - Colors: accept `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `rgb()`, `hsl()`, `oklch()`, named colors;
@@ -58,7 +58,7 @@ export interface DesignContract {
 - Unknown section in body → preserve, no error (spec-compliant).
 - `omitted` array suppresses "missing section" concerns.
 
-**`resolver.ts`** — `findDesignContract(cwd): DesignContract | null`
+**`resolver.ts`**: `findDesignContract(cwd): DesignContract | null`
 - Candidates per dir: `design.md`, `DESIGN.md`, `docs/design.md`, `docs/DESIGN.md`.
 - Walk up `cwd` → parents until hit (stop at filesystem root).
 - First hit wins; parse errors → null + collector of parse error (exposed for CLI warning).
@@ -70,7 +70,7 @@ export interface DesignContract {
 - Radii: px values from `contract.rounded`.
 - Helpers: `isExemptColor(hex)`, `isExemptFont(family)`, `isExemptRadius(value)`.
 
-**`drift.ts`** — `scanDrift(code, filePath, contract): Diagnostic[]`
+**`drift.ts`**: `scanDrift(code, filePath, contract): Diagnostic[]`
 - Per file: find color literals (`#hex`, `rgb()`, `hsl()` in CSS + className Tailwind color
   classes `text-/bg-/border-/from-/to-/ring-/shadow-{color}-{shade}`), font-family
   declarations, radius values (`rounded-*`, `rounded-[Npx]`).
@@ -85,7 +85,7 @@ export interface DesignContract {
 - Radius drift: `rounded-[Npx]` value not in contract.rounded and used 3+ times.
 - Frequency counting is per-project (aggregate across scanned files), not per-file.
 
-**`index.ts`** — public surface:
+**`index.ts`**: public surface:
 - `parseDesignContract`, `findDesignContract`, `getExemptions`, `scanDrift`, types.
 - `designContractScan(code, filePath, options)` convenience combining drift.
 
@@ -99,11 +99,11 @@ Exemption hooks in rules:
 - `no-ai-purple`: skip flagged hex if `isExemptColor(hex)`.
 - `no-slop-font`: skip Inter/slop-display if `isExemptFont(family)`.
 - `no-glow-shadow`: skip if glow color hex exempted.
-- (`no-gradient-text`/`no-gradient-button` remain structural — no color exemption needed.)
+- (`no-gradient-text`/`no-gradient-button` remain structural; no color exemption needed.)
 
 Bundle penalty:
 - If `options.hasContract === false` → threshold 4 → 3, and bundle message appends
-  `(project has no DESIGN.md — add one to declare intent)`.
+  `(project has no DESIGN.md; add one to declare intent)`.
 - If `options.hasContract === true` → threshold stays 4 (declared systems get benefit of doubt).
 
 ### CLI wiring
@@ -117,7 +117,7 @@ Bundle penalty:
 - Resolve `findDesignContract(process.cwd())` once per run.
 - Pass to `scanFile`.
 - Report line: if `hasContract` → show `Using DESIGN.md: <path>`; else warning
-  `no DESIGN.md found — slop flags are strict`.
+  `no DESIGN.md found; slop flags are strict`.
 - `--design-md <path>` flag override for explicit path.
 
 ### Tests

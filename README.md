@@ -14,6 +14,7 @@ npx de-slop fix .         # rewrite the fixable findings
 npx de-slop prose docs/   # score documentation for AI writing tells
 npx de-slop budget .      # erosion and verbosity against a baseline
 npx de-slop context .     # agent instructions vs the repo
+npx de-slop rules         # every rule, or --write docs/RULES.md
 npx de-slop intercept 'npm install <pkg>'
 npx de-slop mcp           # stdio MCP server
 ```
@@ -29,13 +30,15 @@ npx de-slop mcp           # stdio MCP server
 | `design-contract` | Drift from a declared DESIGN.md: values used repeatedly but never declared, plus exemptions for tokens the project did choose | 3 dimensions |
 | `ux-guard` | Provable accessibility failures: missing alt text, unlabeled icon buttons, removed focus rings, placeholder-only labels, blocked zoom, 44px touch targets, motion without reduced-motion, off-grid spacing | 12 |
 | `prose-slop` | AI writing tells: not-X-but-Y contrasts, staged openers, chatbot residue, inflated significance, fake depth, sales language, AI vocabulary, dash overload, bold-label lists, closers | 14 |
-| `context-rot` | Agent instructions pointing at files, symbols, or scripts that no longer exist | 4 |
+| `context-rot` | Agent instructions pointing at files, symbols, or scripts that no longer exist, plus instruction quality: line budget, generic advice, pasted trees, duplicates | 8 |
+| `mcp-guard` | MCP client configs: plaintext transport, literal secrets, unpinned launches, typosquatted packages, dangerous auto-approval | 5 |
 | `test-lock` | Test files rewritten to pass: removed tests, skipped cases, weakened assertions, happy-path-only coverage | fingerprint |
 | `package-gate` | Slopsquatting: missing packages, brand-new packages, typosquats within one edit of a popular name, install scripts that pipe to a shell | registry + corpus |
 | `spec-contractor` | Spec drift: declared functions missing, invariants violated | contract |
 | `circuit-breaker` | Doom loops: repeated identical attempts, tool-call budget, diff-line budget | state machine |
 | `degradation` | Quality decay across iterations: structural erosion, verbosity, compared against a stored baseline | 2 metrics |
 | `ast-pruner` | Context rot from reading whole files: prunes to the declarations a query needs | pruner |
+| `report` | Markdown, JSON, and standalone HTML output for `de-slop report` | renderer |
 
 Severity policy: `error` is a provable defect (failing test, missing package,
 XSS, WCAG failure, chatbot residue in published docs). `warning` is a pattern
@@ -84,10 +87,10 @@ directory name or a repo-relative path.
 }
 ```
 
-Nine tools: `check_slop`, `check_prose`, `check_ux`, `check_degradation`,
-`check_context_rot`, `check_design_contract`, `verify_tests`, `check_package`,
-`spec_verify`. `check_slop` runs every detector and picks them by extension;
-the rest target one concern each.
+Ten tools: `check_slop`, `check_prose`, `check_ux`, `check_degradation`,
+`check_context_rot`, `check_design_contract`, `check_mcp_config`,
+`verify_tests`, `check_package`, `spec_verify`. `check_slop` runs every detector
+and picks them by extension; the rest target one concern each.
 
 ## GitHub Action
 
@@ -105,7 +108,8 @@ writes the client config.
 
 ```bash
 npm run build       # tsc core + mcp-server into dist
-npm test            # vitest, 443 tests
+npm test            # vitest, 501 tests
+npm run test:extension  # node:test, 18 tests
 npm run typecheck   # tsc --noEmit
 ```
 

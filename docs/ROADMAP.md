@@ -54,9 +54,19 @@ positives that made the tool noisy on its own source.
 - [x] `runtime-guard`: exact nullable method names, declared async callees only
 - [x] Parser bridge: virtual FS slots wrap at 512
 
+## v0.6: Research and editor
+
+- [x] `mcp-guard`: 5 rules over MCP client configs (plaintext transport, literal
+      secrets, unpinned launches, typosquatted packages, dangerous auto-approve)
+- [x] `context-rot` instruction quality: line budget, generic advice, pasted
+      directory trees, duplicated rules
+- [x] `de-slop report` writes a standalone HTML file with no scripts
+- [x] Rule catalog: 85 rules documented once, `de-slop rules` regenerates
+      `docs/RULES.md`, a test fails when the two drift
+- [x] VS Code extension: diagnostics on save, status bar, workspace scan
+
 ## Next
 
-- [ ] Publish `@de-slop/cli` to npm
-- [ ] VS Code extension
-- [ ] `de-slop report` HTML output
-- [ ] Per-rule documentation pages
+- [ ] Publish `@de-slop/cli` and the extension to their registries
+- [ ] Per-rule example fixtures in the reference page
+- [ ] Locale-aware prose rules beyond English and Indonesian

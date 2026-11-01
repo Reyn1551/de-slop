@@ -22,6 +22,8 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - run: npm run build
+      - run: npm run test:extension
 
   dogfood:
     runs-on: ubuntu-latest
@@ -30,3 +32,10 @@ jobs:
       - uses: ./packages/action
         with:
           command: check
+      - uses: ./packages/action
+        with:
+          command: context
+      - uses: ./packages/action
+        with:
+          command: prose
+          paths: docs README.md CHANGELOG.md AGENTS.md

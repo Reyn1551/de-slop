@@ -1,6 +1,6 @@
 {
   "name": "@de-slop/mcp-server",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "description": "de-slop MCP server for Cursor/Claude Code — 4 tools: check_slop, verify_tests, check_package, spec_verify",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

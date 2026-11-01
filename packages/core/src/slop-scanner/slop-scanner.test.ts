@@ -454,6 +454,11 @@ describe('no-magic-string', () => {
     const diags = scanSource(code, 'magic.ts', { rules: ['no-magic-string'] });
     expect(diags[0].severity).toBe('warning');
   });
+
+  it('skips package.json repository links', () => {
+    const code = '{\n  "repository": { "url": "https://github.com/owner/repo" }\n}\n';
+    expect(ids(code, 'package.json')).not.toContain('no-magic-string');
+  });
 });
 
 describe('no-pill-class-string', () => {

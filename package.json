@@ -1,6 +1,6 @@
 {
   "name": "de-slop",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "private": true,
   "description": "Anti AI-slop toolkit: test-lock, spec-contractor, slop-scanner, package-gate, circuit-breaker, runtime-guard",
   "workspaces": [
@@ -10,7 +10,8 @@
     "lint": "eslint . --ext .js",
     "typecheck": "tsc --noEmit -p packages/core && tsc --noEmit -p packages/mcp-server",
     "test": "vitest run",
-    "build": "tsc -p packages/core && tsc -p packages/mcp-server"
+    "build": "tsc -p packages/core && tsc -p packages/mcp-server",
+    "test:extension": "node --test packages/vscode-extension/test/lint.test.js"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
