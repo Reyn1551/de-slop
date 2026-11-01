@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit -p packages/core && tsc --noEmit -p packages/mcp-server",
     "test": "vitest run",
     "build": "tsc -p packages/core && tsc -p packages/mcp-server",
-    "test:extension": "node --test packages/vscode-extension/test/lint.test.js"
+    "test:extension": "node --test packages/vscode-extension/test/*.test.js"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",

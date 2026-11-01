@@ -53,5 +53,6 @@ behave differently depending on where it runs.
 ```
 src/lint.js        text in, diagnostics out; no editor API, so it is testable
 src/extension.js   VS Code wiring: collections, status bar, commands, events
-test/lint.test.js  18 tests against the lint step with node:test
+test/lint.test.js        18 tests against the lint step
+test/extension.test.js   10 tests that activate() with a stubbed vscode module
 ```

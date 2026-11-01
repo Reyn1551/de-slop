@@ -115,7 +115,7 @@ writes the client config.
 ```bash
 npm run build       # tsc core + mcp-server into dist
 npm test            # vitest, 527 tests
-npm run test:extension  # node:test, 18 tests
+npm run test:extension  # node:test, 28 tests
 npm run typecheck   # tsc --noEmit
 ```
 

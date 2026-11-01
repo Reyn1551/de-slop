@@ -60,7 +60,7 @@
     }
   },
   "scripts": {
-    "test": "node --test test/lint.test.js"
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "@de-slop/core": "*"
