@@ -11,8 +11,18 @@ export { scanSource } from './slop-scanner';
 export type { Diagnostic } from './slop-scanner';
 export { fingerprintTests, verifyTests, verifyAssertionQuality, lockTestFile, verifyTestFile } from './test-lock';
 export type { TestViolation, TestFileFingerprint } from './test-lock';
-export { checkPackage, checkPackages, checkPackageManifest, parseInstallCommand, checkInstallScript } from './package-gate';
-export type { PackageReport, Verdict, ScriptFindings } from './package-gate';
+export {
+  checkPackage,
+  checkPackages,
+  checkPackageManifest,
+  parseInstallCommand,
+  checkInstallScript,
+  findTyposquat,
+  editDistance,
+  normalizePackageName,
+  corpusSize,
+} from './package-gate';
+export type { PackageReport, Verdict, ScriptFindings, TyposquatMatch } from './package-gate';
 export { CircuitBreaker, countChangedLines, saveState, loadState } from './circuit-breaker';
 export type { BreakerOptions, BreakerState } from './circuit-breaker';
 export { CircuitBreakerTrippedError } from './circuit-breaker';

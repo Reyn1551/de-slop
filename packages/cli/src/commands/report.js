@@ -177,7 +177,11 @@ export default async function report(argv) {
   const outDir = options.out ?? '.de-slop/reports';
 
   const { files } = findSourceFiles([target]);
-  const contract = findDesignContract(process.cwd()).contract;
+  const lookup = findDesignContract(process.cwd());
+  if (lookup.error !== null) {
+    console.error(`de-slop report: ${lookup.error.path}: ${lookup.error.message}`);
+  }
+  const contract = lookup.contract;
   const diagnosticsByFile = [];
   for (const filePath of files) {
     const diagnostics = scanFile(filePath, undefined, contract);
