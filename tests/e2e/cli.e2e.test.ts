@@ -157,6 +157,20 @@ describe('cli e2e', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
+  it('check --strict fails on warnings only', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-strict-'));
+    const file = join(dir, 'noise.ts');
+    writeFileSync(file, 'export function helper(input: number) {\n  const result = input + 1;\n  return result;\n}\n');
+
+    const relaxed = runCli(['check', file]);
+    expect(relaxed.status).toBe(0);
+    expect(relaxed.stdout).toContain('warning');
+
+    const strict = runCli(['check', file, '--strict']);
+    expect(strict.status).toBe(1);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
   it('check flags prose tells in a markdown file', () => {
     const dir = mkdtempSync(join(tmpdir(), 'deslop-prose-'));
     const file = join(dir, 'guide.md');
