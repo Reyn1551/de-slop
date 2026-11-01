@@ -112,6 +112,20 @@ function registerTools(server: McpServer): void {
   );
 
   server.tool(
+    'check_mcp_config',
+    'Check an MCP client config for security defects: plaintext remote transport, literal secrets in env, unpinned launcher packages, typosquatted launcher names, and auto-approval of destructive tools',
+    {
+      content: z.string().describe('MCP config JSON'),
+      path: z.string().describe('Config path, e.g. .mcp.json'),
+      rules: z.array(z.string()).optional().describe('Only run these rule ids'),
+    },
+    async ({ content, path, rules }) => {
+      const { scanMcpConfig } = await import('@de-slop/core/mcp-guard');
+      return textResult({ diagnostics: scanMcpConfig(content, path, rules ? { rules } : {}) });
+    },
+  );
+
+  server.tool(
     'check_design_contract',
     'Parse a DESIGN.md contract and check a file for drift: values used often enough to be deliberate (3+ occurrences by default) that the contract never declares',
     {

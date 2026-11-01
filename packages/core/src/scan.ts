@@ -2,6 +2,7 @@ import { scanSource } from './slop-scanner';
 import { guardSource } from './runtime-guard';
 import { agentGuardScan } from './agent-guard';
 import { designSlopScan } from './design-slop';
+import { scanMcpConfig } from './mcp-guard';
 import { scanProse } from './prose-slop';
 import { scanUx } from './ux-guard';
 import type { Diagnostic } from './slop-scanner/types';
@@ -56,6 +57,10 @@ export function scanContent(
 
   if (DOC_EXTENSION.test(filePath)) {
     diagnostics.push(...runDetector(filePath, 'check prose', () => scanProse(code, filePath, options)));
+  }
+
+  if (/mcp/i.test(filePath) && /\.json$/i.test(filePath)) {
+    diagnostics.push(...runDetector(filePath, 'check MCP config', () => scanMcpConfig(code, filePath, options)));
   }
 
   return diagnostics;

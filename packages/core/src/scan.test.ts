@@ -55,6 +55,21 @@ describe('scanContent', () => {
     expect(diagnostics.every((diagnostic) => diagnostic.ruleId === 'no-hardcoded-secret')).toBe(true);
   });
 
+  it('runs the MCP rules for a client config', () => {
+    const config = JSON.stringify({ mcpServers: { remote: { url: 'http://mcp.example.com' } } }, null, 2);
+    const ids = scanContent(config, '.mcp.json').map((diagnostic) => diagnostic.ruleId);
+    expect(ids).toContain('no-plaintext-remote');
+  });
+
+  it('leaves a clean MCP config silent', () => {
+    const config = JSON.stringify({
+      mcpServers: { remote: { url: 'https://mcp.example.com', autoApprove: ['search'] } },
+    }, null, 2);
+    const ids = scanContent(config, '.mcp.json').map((diagnostic) => diagnostic.ruleId);
+    expect(ids).not.toContain('no-plaintext-remote');
+    expect(ids).not.toContain('no-auto-approve-dangerous');
+  });
+
   it('stamps every diagnostic with the file path', () => {
     const code = 'const apiKey = "sk-live-abcdef";\n';
     for (const diagnostic of scanContent(code, 'src/config.ts')) {

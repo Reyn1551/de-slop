@@ -27,7 +27,8 @@ function looksLikeDomain(value: string): boolean {
   return TOP_LEVEL_DOMAINS[suffix] === true;
 }
 const ERROR_LIKE_PATTERN = /[\s.,;:!?()[\]{}]/;
-const CONFIG_FILE_PATTERN = /(config|constant)/i;
+// An MCP config's URLs are its payload, not magic values; mcp-guard reads them.
+const CONFIG_FILE_PATTERN = /(config|constant)|(?:^|\/)\.?mcp[\w.-]*\.json$/i;
 // Test fixtures hold URLs, ports, and ids on purpose. Flagging them trains
 // people to ignore the rule, which is worse than not running it there.
 const TEST_FILE_PATTERN = /\.(?:test|spec)\.[cm]?[jt]sx?$|(?:^|\/)(?:__tests__|tests?|fixtures?)\//i;

@@ -41,6 +41,8 @@ export * as uxGuard from './ux-guard';
 export { scanUx, UX_RULES, UX_RULE_IDS } from './ux-guard';
 export { scanContent } from './scan';
 export type { ScanContentOptions } from './scan';
+export * as mcpGuard from './mcp-guard';
+export { scanMcpConfig, parseMcpConfig, isMcpConfig, MCP_RULES, MCP_RULE_IDS } from './mcp-guard';
 export * as contextRot from './context-rot';
 export { scanContextRot, collectRepoFacts, isAgentConfig, CONTEXT_ROT_RULES, CONTEXT_ROT_RULE_IDS } from './context-rot';
 export type { RepoFacts } from './context-rot';

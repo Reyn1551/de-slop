@@ -19,7 +19,8 @@
     "./ux-guard": "./dist/ux-guard/index.js",
     "./degradation": "./dist/degradation/index.js",
     "./context-rot": "./dist/context-rot/index.js",
-    "./design-contract": "./dist/design-contract/index.js"
+    "./design-contract": "./dist/design-contract/index.js",
+    "./mcp-guard": "./dist/mcp-guard/index.js"
   },
   "files": [
     "dist"

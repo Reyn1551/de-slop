@@ -8,6 +8,12 @@ import type {
   TextLocator,
 } from './types';
 import { noStalePath, noStaleSymbol, noStaleScript, noContradictoryInstruction } from './rules';
+import {
+  noDuplicateInstruction,
+  noGenericInstruction,
+  noOversizedInstruction,
+  noSelfDescription,
+} from './rules/quality';
 
 export type { ContextRotOptions, RepoFacts } from './types';
 export { collectRepoFacts, normalizeRepoPath } from './facts';
@@ -17,6 +23,10 @@ export const CONTEXT_ROT_RULES = {
   'no-stale-symbol': noStaleSymbol,
   'no-stale-script': noStaleScript,
   'no-contradictory-instruction': noContradictoryInstruction,
+  'no-oversized-instruction': noOversizedInstruction,
+  'no-generic-instruction': noGenericInstruction,
+  'no-self-description': noSelfDescription,
+  'no-duplicate-instruction': noDuplicateInstruction,
 } as const;
 
 export type ContextRotRuleId = keyof typeof CONTEXT_ROT_RULES;

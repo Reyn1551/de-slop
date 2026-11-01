@@ -9,8 +9,8 @@ const FILES = [
 const FACTS = collectRepoFacts(FILES, JSON.stringify({ scripts: { build: 'tsc', test: 'vitest' } }));
 
 describe('context-rot', () => {
-  it('exposes 4 rules', () => {
-    expect(CONTEXT_ROT_RULE_IDS).toHaveLength(4);
+  it('exposes 8 rules', () => {
+    expect(CONTEXT_ROT_RULE_IDS).toHaveLength(8);
   });
 
   it('recognises agent config filenames', () => {
@@ -95,5 +95,71 @@ describe('context-rot', () => {
     const doc = 'See https://example.com/packages/core/src/thing.ts for details.\n';
     const diags = scanContextRot(doc, 'AGENTS.md', FACTS);
     expect(diags.some((d) => d.ruleId === 'no-stale-path')).toBe(false);
+  });
+
+  it('flags a file past the line budget', () => {
+    const doc = Array.from({ length: 160 }, (_, index) => `- Rule ${index}: run the build.`).join('\n');
+    const diags = scanContextRot(doc, 'AGENTS.md', FACTS);
+    const found = diags.find((d) => d.ruleId === 'no-oversized-instruction');
+    expect(found?.severity).toBe('warning');
+  });
+
+  it('treats a file past the hard ceiling as an error', () => {
+    const doc = Array.from({ length: 240 }, (_, index) => `- Rule ${index}: run the build.`).join('\n');
+    const diags = scanContextRot(doc, 'AGENTS.md', FACTS);
+    expect(diags.find((d) => d.ruleId === 'no-oversized-instruction')?.severity).toBe('error');
+  });
+
+  it('accepts a file inside the budget', () => {
+    const doc = Array.from({ length: 40 }, (_, index) => `- Rule ${index}: run the build.`).join('\n');
+    const diags = scanContextRot(doc, 'AGENTS.md', FACTS);
+    expect(diags.some((d) => d.ruleId === 'no-oversized-instruction')).toBe(false);
+  });
+
+  it('flags generic advice the model already follows', () => {
+    const doc = '- Follow best practices for error handling.\n- Write clean, maintainable code.\n';
+    const diags = scanContextRot(doc, 'AGENTS.md', FACTS);
+    const found = diags.filter((d) => d.ruleId === 'no-generic-instruction');
+    expect(found).toHaveLength(2);
+  });
+
+  it('accepts a specific constraint', () => {
+    const doc = '- Money is Decimal, never float.\n- Never edit files in /generated/.\n';
+    const diags = scanContextRot(doc, 'AGENTS.md', FACTS);
+    expect(diags.some((d) => d.ruleId === 'no-generic-instruction')).toBe(false);
+  });
+
+  it('flags a pasted directory tree', () => {
+    const tree = [
+      '```text',
+      '├── src/',
+      '│   ├── index.ts',
+      '│   └── utils.ts',
+      '├── tests/',
+      '│   └── index.test.ts',
+      '└── package.json',
+      '```',
+    ].join('\n');
+    const diags = scanContextRot(tree, 'AGENTS.md', FACTS);
+    expect(diags.some((d) => d.ruleId === 'no-self-description')).toBe(true);
+  });
+
+  it('accepts a short tree', () => {
+    const doc = 'Layout: `packages/core` for logic, `packages/cli` for the binary.\n';
+    const diags = scanContextRot(doc, 'AGENTS.md', FACTS);
+    expect(diags.some((d) => d.ruleId === 'no-self-description')).toBe(false);
+  });
+
+  it('flags a rule repeated verbatim', () => {
+    const rule = '- Never commit secrets or environment files to the repository.';
+    const doc = `${rule}\n\nSome prose between them.\n\n${rule}\n`;
+    const diags = scanContextRot(doc, 'AGENTS.md', FACTS);
+    expect(diags.some((d) => d.ruleId === 'no-duplicate-instruction')).toBe(true);
+  });
+
+  it('accepts two distinct rules', () => {
+    const doc = '- Never commit secrets to the repository.\n- Run npm test before claiming the task is done.\n';
+    const diags = scanContextRot(doc, 'AGENTS.md', FACTS);
+    expect(diags.some((d) => d.ruleId === 'no-duplicate-instruction')).toBe(false);
   });
 });

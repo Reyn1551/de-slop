@@ -22,7 +22,7 @@ export const MCP_CONFIG_CURSOR = `{
   "mcpServers": {
     "de-slop": {
       "command": "npx",
-      "args": ["-y", "de-slop", "mcp"],
+      "args": ["-y", "de-slop@^0.4.0", "mcp"],
       "env": {}
     }
   }
@@ -33,7 +33,7 @@ export const MCP_CONFIG_CLAUDE = `{
   "mcpServers": {
     "de-slop": {
       "command": "npx",
-      "args": ["-y", "de-slop", "mcp"]
+      "args": ["-y", "de-slop@^0.4.0", "mcp"]
     }
   }
 }
