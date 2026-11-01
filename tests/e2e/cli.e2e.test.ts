@@ -129,10 +129,16 @@ describe('cli e2e', () => {
     expect(status).toBe(0);
     expect(stdout).toContain('REPORT.md');
     expect(stdout).toContain('report.json');
+    expect(stdout).toContain('REPORT.html');
     expect(existsSync(join(out, 'REPORT.md'))).toBe(true);
+    expect(existsSync(join(out, 'REPORT.html'))).toBe(true);
     const md = readFileSync(join(out, 'REPORT.md'), 'utf8');
     expect(md).toContain('de-slop Report');
     expect(md).toContain('no-hardcoded-secret');
+    const html = readFileSync(join(out, 'REPORT.html'), 'utf8');
+    expect(html.startsWith('<!doctype html>')).toBe(true);
+    expect(html).toContain('no-hardcoded-secret');
+    expect(html).not.toContain('<script');
     rmSync(dir, { recursive: true, force: true });
   });
 

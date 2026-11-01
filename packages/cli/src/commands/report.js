@@ -4,6 +4,7 @@ import {
   analyzeProject,
   checkPackages,
   findDesignContract,
+  htmlReport,
   HUMAN_EROSION_BASELINE,
   HUMAN_VERBOSITY_BASELINE,
 } from '@de-slop/core';
@@ -18,6 +19,7 @@ Usage: de-slop report [paths...] [options]
 
 Runs every de-slop module against the target and writes:
   REPORT.md           human-readable report with analysis
+  REPORT.html         standalone HTML report, no scripts or external requests
   report.json         raw machine-readable data
 
 Checks included:
@@ -244,11 +246,14 @@ export default async function report(argv) {
   const { mkdirSync, writeFileSync } = await import('node:fs');
   mkdirSync(outDir, { recursive: true });
   const mdPath = join(outDir, 'REPORT.md');
+  const htmlPath = join(outDir, 'REPORT.html');
   const jsonPath = join(outDir, 'report.json');
   writeFileSync(mdPath, markdownReport(data), 'utf8');
+  writeFileSync(htmlPath, htmlReport(data), 'utf8');
   writeFileSync(jsonPath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
 
   console.log(`de-slop report: wrote ${mdPath}`);
+  console.log(`de-slop report: wrote ${htmlPath}`);
   console.log(`de-slop report: wrote ${jsonPath}`);
   return 0;
 }
