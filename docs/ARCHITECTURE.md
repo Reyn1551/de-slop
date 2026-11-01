@@ -27,6 +27,7 @@ scanContent(code, filePath, options) → Diagnostic[]
 | `.ts .tsx .js .jsx .mjs .cjs .json` | slop-scanner, runtime-guard, agent-guard, design-slop |
 | `.tsx .jsx .html .vue .svelte .astro .css` | + ux-guard |
 | `.md .mdx .txt .rst .adoc` | agent-guard, design-slop, prose-slop |
+| `*mcp*.json` | agent-guard, design-slop, mcp-guard |
 
 A detector that throws becomes one `scan-error` diagnostic. The other detectors
 still report, so one unparseable file does not hide the rest of the run.
@@ -40,6 +41,8 @@ still report, so one unparseable file does not hide the rest of the run.
 | `agent-guard` | `agentGuardScan` | AST + text, 7 rules |
 | `design-slop` | `scanDesignSlop` | regex over JSX/CSS, 11 rules + bundle |
 | `design-contract` | `parseDesignContract`, `findDesignContract`, `scanDrift` | YAML subset + color math |
+| `mcp-guard` | `scanMcpConfig` | JSON over MCP client configs |
+| `commit-guard` | `analyzeCommitMessage` | message against a diff |
 | `ux-guard` | `scanUx` | regex over JSX/HTML/CSS, 12 rules |
 | `prose-slop` | `scanProse`, `analyzeProse` | text, 14 rules + score |
 | `context-rot` | `scanContextRot`, `collectRepoFacts` | text against repo facts, 4 rules |

@@ -22,6 +22,7 @@ export type RuleModule =
   | 'prose-slop'
   | 'context-rot'
   | 'mcp-guard'
+  | 'commit-guard'
   | 'design-contract'
   | 'cross-cutting';
 
@@ -123,6 +124,17 @@ export const RULES_CATALOG: RuleDoc[] = [
   { id: 'no-auto-approve-dangerous', module: 'mcp-guard', severity: 'warning', description: 'Auto-approving a tool that writes, execs, or deploys.' },
   { id: 'mcp-config-unparseable', module: 'mcp-guard', severity: 'warning', description: 'An MCP config that is not JSON with a server map.' },
 
+  // commit-guard
+  { id: 'no-phantom-path', module: 'commit-guard', severity: 'error', description: 'A commit message naming a file the diff never touched.' },
+  { id: 'no-phantom-addition', module: 'commit-guard', severity: 'error', description: 'A message that says a symbol was added when no file declares it.' },
+  { id: 'no-phantom-removal', module: 'commit-guard', severity: 'error', description: 'A message that says a symbol was removed when it is still declared.' },
+  { id: 'no-test-claim-without-test', module: 'commit-guard', severity: 'error', description: 'A message mentioning tests when the diff touches no test file.' },
+  { id: 'no-generic-subject', module: 'commit-guard', severity: 'warning', description: 'A subject like "update code" that names no change.' },
+  { id: 'no-oversized-subject', module: 'commit-guard', severity: 'warning', description: 'A subject past 72 characters, which wraps in every review UI.' },
+  { id: 'no-unmentioned-scope', module: 'commit-guard', severity: 'warning', description: 'More than five files changed and the message names none of them.' },
+  { id: 'no-slop-message-body', module: 'commit-guard', severity: 'warning', description: 'A body reporting an intention instead of a change.' },
+  { id: 'commit-empty-message', module: 'commit-guard', severity: 'error', description: 'An empty commit message.' },
+
   // design-contract
   { id: 'design-contract-drift', module: 'design-contract', severity: 'error', description: 'A color, font, or radius used three or more times that the DESIGN.md never declares.' },
 
@@ -142,6 +154,7 @@ export const RULE_MODULE_ORDER: RuleModule[] = [
   'prose-slop',
   'context-rot',
   'mcp-guard',
+  'commit-guard',
   'cross-cutting',
 ];
 

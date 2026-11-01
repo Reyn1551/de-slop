@@ -52,9 +52,17 @@ if git diff --cached --name-only | grep -q . && git diff --cached | grep -qiE "c
   exit 1
 fi
 
+# the message has to match the diff: a claim the code contradicts is the
+# strongest predictor of a rejected PR (arXiv:2601.04886)
+npx --no-install de-slop commit .git/COMMIT_EDITMSG
+if [ $? -ne 0 ]; then
+  echo "de-slop: commit message contradicts the staged diff; fix it or commit with --no-verify"
+  exit 1
+fi
+
 npx --no-install de-slop check . --lock
 if [ $? -ne 0 ]; then
-  echo "de-slop: check failed - fix the problems or bypass with 'git commit --no-verify'"
+  echo "de-slop: check failed, fix the problems or bypass with 'git commit --no-verify'"
   exit 1
 fi
 exit 0

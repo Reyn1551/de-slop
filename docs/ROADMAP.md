@@ -56,6 +56,10 @@ positives that made the tool noisy on its own source.
 
 ## v0.6: Research and editor
 
+- [x] `commit-guard`: message against diff (arXiv:2601.04886): phantom path,
+      phantom addition, phantom removal, test claim without a test, generic
+      subject, oversized subject, unmentioned scope, slop body
+
 - [x] `mcp-guard`: 5 rules over MCP client configs (plaintext transport, literal
       secrets, unpinned launches, typosquatted packages, dangerous auto-approve)
 - [x] `context-rot` instruction quality: line budget, generic advice, pasted
@@ -64,6 +68,7 @@ positives that made the tool noisy on its own source.
 - [x] Rule catalog: 85 rules documented once, `de-slop rules` regenerates
       `docs/RULES.md`, a test fails when the two drift
 - [x] VS Code extension: diagnostics on save, status bar, workspace scan
+- [x] `de-slop commit` wired into the pre-commit hook and the MCP server
 
 ## Next
 

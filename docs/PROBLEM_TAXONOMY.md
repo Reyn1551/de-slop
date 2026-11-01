@@ -108,6 +108,29 @@ product and a reviewer cannot tell a decision from an accident.
 `design-contract` parses the contract, exempts the values it declares, and
 reports values used repeatedly that it never declares.
 
+## 12. Message-code inconsistency
+
+An agent writes a commit or pull request that describes work the diff does not
+contain: a file it never touched, a function it never added, "adds tests" with
+no test file. Gong, Pinna, Bian, and Zhang measured this across 23,247 agentic
+pull requests (arXiv:2601.04886). The 1.7% with high inconsistency had a 51.7%
+lower acceptance rate and took 3.5x longer to merge, and the most common type,
+45.4%, claimed changes the diff never made.
+
+`commit-guard` compares the message with the change set: a named path or symbol
+the diff contradicts is an error, a subject that names nothing is a warning.
+
+## 13. MCP config exposure
+
+An MCP client config is executable trust. A plaintext remote lets anyone on the
+path rewrite tool descriptions the model will follow. A literal secret in an
+`env` block ships with the config and reaches every server in the file. An
+unpinned `npx` launch installs whatever the registry serves that day. A launch
+name one edit from a popular package is how a hallucinated name becomes a
+compromise.
+
+`mcp-guard` checks all four, plus auto-approval of tools that write or exec.
+
 ## Severity policy
 
 `error` means a provable defect or a security issue: failing tests, missing

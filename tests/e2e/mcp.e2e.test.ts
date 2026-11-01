@@ -9,13 +9,14 @@ const root = resolve(__dirname, '..', '..');
 const serverEntry = join(root, 'packages/mcp-server/dist/index.js');
 
 describe('mcp server e2e', () => {
-  it('advertises all ten tools', async () => {
+  it('advertises all eleven tools', async () => {
     const transport = new StdioClientTransport({ command: process.execPath, args: [serverEntry] });
     const client = new Client({ name: 'e2e', version: '1.0.0' });
     await client.connect(transport);
     const { tools } = await client.listTools();
     const names = tools.map((tool: any) => tool.name).sort();
     expect(names).toEqual([
+      'check_commit_message',
       'check_context_rot',
       'check_degradation',
       'check_design_contract',
@@ -154,6 +155,24 @@ describe('mcp server e2e', () => {
     expect(payload.current.erosion).toBeGreaterThan(0);
     expect(payload.delta.degrading).toBe(true);
     expect(payload.delta.reasons.join(' ')).toContain('erosion');
+    await client.close();
+  });
+
+  it('check_commit_message catches a contradicted claim', async () => {
+    const transport = new StdioClientTransport({ command: process.execPath, args: [serverEntry] });
+    const client = new Client({ name: 'e2e', version: '1.0.0' });
+    await client.connect(transport);
+    const result = await client.callTool({
+      name: 'check_commit_message',
+      arguments: {
+        message: 'feat: add `refreshToken` to `src/token.ts`',
+        files: [{ path: 'src/auth.ts', status: 'modified', addedSymbols: ['signIn'] }],
+      },
+    });
+    const payload = JSON.parse((result as any).content[0].text);
+    const ruleIds = payload.diagnostics.map((diagnostic: { ruleId: string }) => diagnostic.ruleId);
+    expect(ruleIds).toContain('no-phantom-addition');
+    expect(ruleIds).toContain('no-phantom-path');
     await client.close();
   });
 

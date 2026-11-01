@@ -7,6 +7,7 @@ import { UX_RULE_IDS } from './ux-guard';
 import { PROSE_SLOP_RULE_IDS } from './prose-slop';
 import { CONTEXT_ROT_RULE_IDS } from './context-rot';
 import { MCP_RULE_IDS } from './mcp-guard';
+import { COMMIT_RULE_IDS } from './commit-guard';
 import { RULES_CATALOG, findRule, rulesByModule } from './rules-catalog';
 
 const AGENT_GUARD_TEXT_RULES = ['no-invisible-unicode', 'no-unsafe-install-docs', 'no-vite-boilerplate'];
@@ -21,6 +22,7 @@ const REGISTERED: Record<string, string[]> = {
   'prose-slop': [...PROSE_SLOP_RULE_IDS, 'prose-slop-bundle'],
   'context-rot': [...CONTEXT_ROT_RULE_IDS],
   'mcp-guard': [...MCP_RULE_IDS, 'mcp-config-unparseable'],
+  'commit-guard': [...COMMIT_RULE_IDS, 'commit-empty-message'],
   'design-contract': ['design-contract-drift'],
   'cross-cutting': ['scan-error', 'test-lock', 'package-gate'],
 };
@@ -71,6 +73,7 @@ describe('rules catalog', () => {
       'prose-slop',
       'context-rot',
       'mcp-guard',
+      'commit-guard',
       'cross-cutting',
     ]);
   });
@@ -81,7 +84,7 @@ describe('rules catalog', () => {
     expect(findRule('does-not-exist')).toBeUndefined();
   });
 
-  it('documents 85 rules', () => {
-    expect(RULES_CATALOG).toHaveLength(85);
+  it('documents 94 rules', () => {
+    expect(RULES_CATALOG).toHaveLength(94);
   });
 });

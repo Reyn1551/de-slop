@@ -31,8 +31,10 @@ npx de-slop mcp
 | `check_prose` | `text` or `path`, optional `rules` | Diagnostics plus a 0-100 score and word counts |
 | `check_ux` | `text` or `path`, optional `rules` | Accessibility diagnostics |
 | `check_degradation` | `files`, optional `baseline` | Erosion, verbosity, and a delta against the baseline |
+| `check_commit_message` | `message`, `files` | Files and symbols the message names that the diff never touched |
 | `check_context_rot` | `content`, `path`, `files`, optional `packageJson` | Stale paths, symbols, and scripts in an instruction file |
 | `check_design_contract` | `content`, `path`, `files`, optional `minimumOccurrences` | Parsed contract plus drift diagnostics for values it never declares |
+| `check_mcp_config` | `content`, `path`, optional `rules` | Plaintext transport, literal secrets, unpinned launches, typosquats, dangerous auto-approval |
 | `verify_tests` | `path`, optional `storePath` | Violations against the locked fingerprint |
 | `check_package` | `name`, `ecosystem` | Verdict: `ok`, `suspicious`, `not-found`, `unknown`, `typosquat` |
 | `spec_verify` | `specPath`, `sourceGlobs` | Spec violations |

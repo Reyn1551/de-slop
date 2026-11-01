@@ -15,6 +15,7 @@ npx de-slop prose docs/   # score documentation for AI writing tells
 npx de-slop budget .      # erosion and verbosity against a baseline
 npx de-slop context .     # agent instructions vs the repo
 npx de-slop rules         # every rule, or --write docs/RULES.md
+npx de-slop commit        # commit message vs staged diff
 npx de-slop intercept 'npm install <pkg>'
 npx de-slop mcp           # stdio MCP server
 ```
@@ -32,6 +33,7 @@ npx de-slop mcp           # stdio MCP server
 | `prose-slop` | AI writing tells: not-X-but-Y contrasts, staged openers, chatbot residue, inflated significance, fake depth, sales language, AI vocabulary, dash overload, bold-label lists, closers | 14 |
 | `context-rot` | Agent instructions pointing at files, symbols, or scripts that no longer exist, plus instruction quality: line budget, generic advice, pasted trees, duplicates | 8 |
 | `mcp-guard` | MCP client configs: plaintext transport, literal secrets, unpinned launches, typosquatted packages, dangerous auto-approval | 5 |
+| `commit-guard` | Commit and PR messages that contradict their diff: a named file or symbol the change never touched, a test claim with no test, a subject naming nothing | 9 |
 | `test-lock` | Test files rewritten to pass: removed tests, skipped cases, weakened assertions, happy-path-only coverage | fingerprint |
 | `package-gate` | Slopsquatting: missing packages, brand-new packages, typosquats within one edit of a popular name, install scripts that pipe to a shell | registry + corpus |
 | `spec-contractor` | Spec drift: declared functions missing, invariants violated | contract |
@@ -58,6 +60,10 @@ set.
   checks edit distance, not only existence.
 - Wikipedia "Signs of AI writing" (via the humanizer skill): the 26 prose tells.
   `prose-slop` implements 14 of them deterministically.
+- Message-code inconsistency (arXiv:2601.04886): across 23,247 agentic PRs, the
+  1.7% whose descriptions claimed changes the diff never made had a 51.7% lower
+  acceptance rate and took 3.5x longer to merge. `commit-guard` checks that
+  claim against the diff.
 - ui-ux-pro-max's 119 UX guidelines: the WCAG 2.2 and Apple HIG thresholds.
   `ux-guard` implements 12 as static checks.
 
@@ -87,9 +93,9 @@ directory name or a repo-relative path.
 }
 ```
 
-Ten tools: `check_slop`, `check_prose`, `check_ux`, `check_degradation`,
+Eleven tools: `check_slop`, `check_prose`, `check_ux`, `check_degradation`,
 `check_context_rot`, `check_design_contract`, `check_mcp_config`,
-`verify_tests`, `check_package`, `spec_verify`. `check_slop` runs every detector
+`check_commit_message`, `verify_tests`, `check_package`, `spec_verify`. `check_slop` runs every detector
 and picks them by extension; the rest target one concern each.
 
 ## GitHub Action
@@ -108,7 +114,7 @@ writes the client config.
 
 ```bash
 npm run build       # tsc core + mcp-server into dist
-npm test            # vitest, 501 tests
+npm test            # vitest, 527 tests
 npm run test:extension  # node:test, 18 tests
 npm run typecheck   # tsc --noEmit
 ```

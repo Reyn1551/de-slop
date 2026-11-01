@@ -163,6 +163,29 @@ describe('cli e2e', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
+  it('commit flags a message claim the diff contradicts', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-commit-'));
+    execFileSync('git', ['init', '-q', dir], { cwd: dir });
+    execFileSync('git', ['config', 'user.email', 't@t.io'], { cwd: dir });
+    execFileSync('git', ['config', 'user.name', 't'], { cwd: dir });
+    mkdirSync(join(dir, 'src'), { recursive: true });
+    writeFileSync(join(dir, 'src', 'auth.ts'), 'export function login() {}\n');
+    execFileSync('git', ['add', '-A'], { cwd: dir });
+    execFileSync('git', ['commit', '-q', '-m', 'feat: initial'], { cwd: dir });
+
+    writeFileSync(join(dir, 'src', 'auth.ts'), 'export function login() {}\nexport function signIn() {}\n');
+    execFileSync('git', ['add', '-A'], { cwd: dir });
+
+    const bad = runCli(['commit', '--message', 'feat: add `refreshToken` and touch `src/missing.ts`'], { cwd: dir });
+    expect(bad.status).toBe(1);
+    expect(bad.stdout).toContain('no-phantom-addition');
+    expect(bad.stdout).toContain('no-phantom-path');
+
+    const good = runCli(['commit', '--message', 'feat(auth): add signIn to src/auth.ts'], { cwd: dir });
+    expect(good.status).toBe(0);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
   it('rules lists the catalog and regenerates the reference', () => {
     const listed = runCli(['rules', '--module', 'mcp-guard']);
     expect(listed.status).toBe(0);

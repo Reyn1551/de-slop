@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const COMMANDS = ['init', 'check', 'fix', 'mcp', 'intercept', 'report', 'prose', 'budget', 'context', 'rules'];
+const COMMANDS = ['init', 'check', 'fix', 'mcp', 'intercept', 'report', 'prose', 'budget', 'context', 'rules', 'commit'];
 
 function cliVersion() {
   const packageJson = fileURLToPath(new URL('../package.json', import.meta.url));
@@ -22,6 +22,7 @@ Commands:
   budget     Measure erosion and verbosity against a baseline
   context    Check agent instruction files against the repo
   rules      List every rule, or regenerate docs/RULES.md
+  commit     Check a commit message against its staged diff
   intercept  Check packages before install (anti slopsquatting)
   report     Run every guardrail and write REPORT.md + report.json
   mcp        Start the MCP server for Cursor and [CC]

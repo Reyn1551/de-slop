@@ -112,6 +112,24 @@ function registerTools(server: McpServer): void {
   );
 
   server.tool(
+    'check_commit_message',
+    'Check a commit or PR message against the change set: a file or symbol the message names but the diff never touched, a test claim with no test file, a subject that names nothing (arXiv:2601.04886)',
+    {
+      message: z.string().describe('Commit or pull request message'),
+      files: z.array(z.object({
+        path: z.string(),
+        status: z.enum(['added', 'modified', 'deleted', 'renamed']).default('modified'),
+        addedSymbols: z.array(z.string()).optional().describe('Declaration names the change added'),
+        removedSymbols: z.array(z.string()).optional().describe('Declaration names the change removed'),
+      })).describe('Files in the change set'),
+    },
+    async ({ message, files }) => {
+      const { analyzeCommitMessage } = await import('@de-slop/core/commit-guard');
+      return textResult({ diagnostics: analyzeCommitMessage(message, { files }) });
+    },
+  );
+
+  server.tool(
     'check_mcp_config',
     'Check an MCP client config for security defects: plaintext remote transport, literal secrets in env, unpinned launcher packages, typosquatted launcher names, and auto-approval of destructive tools',
     {
