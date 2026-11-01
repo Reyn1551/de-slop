@@ -24,3 +24,21 @@ export { agentGuardScan } from './agent-guard';
 export * as designSlop from './design-slop';
 export { scanDesignSlop, designSlopScan } from './design-slop';
 export type { Diagnostic as DesignSlopDiagnostic } from './design-slop';
+export * as proseSlop from './prose-slop';
+export { scanProse, analyzeProse, isProseFile } from './prose-slop';
+export type { ProseScanResult, ProseMetrics } from './prose-slop';
+export * as uxGuard from './ux-guard';
+export { scanUx, UX_RULES, UX_RULE_IDS } from './ux-guard';
+export * as degradation from './degradation';
+export {
+  analyzeFile,
+  analyzeProject,
+  compareBaseline,
+  saveBaseline,
+  loadBaseline,
+  HUMAN_EROSION_BASELINE,
+  HUMAN_VERBOSITY_BASELINE,
+  AGENT_EROSION_BASELINE,
+  AGENT_VERBOSITY_BASELINE,
+} from './degradation';
+export type { FileMetrics, FunctionMetric, ProjectMetrics, BaselineDelta } from './degradation';

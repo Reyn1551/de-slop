@@ -1,51 +1,69 @@
 import type { DesignSlopRuleFn, Diagnostic } from '../types';
 import { collectRegex, toColumn } from '../utils';
 
-// Font rules — based on research:
-// (1) single-font-page where that font is Inter = warning (no display hierarchy).
-// (2) AI-converged display fonts used as headings = warning
-//     (Space Grotesk, Geist, Instrument Serif, Fraunces, Syne, DM Sans).
-// NOT flagged alone: Sora, Bricolage Grotesque, JetBrainsMono-as-code, Manrope, Poppins.
-// Allowlist escape: font-feature-settings present on the family, or a font token variable.
+// Two font tells:
+//   1. A page that uses one family for everything, and that family is Inter.
+//   2. A display face LLMs converge on (Space Grotesk, Geist, Instrument Serif,
+//      Fraunces, Syne, DM Sans) used for headings.
+//
+// "Single font" is checked properly now: the rule collects every declared
+// family and only fires when Inter is the only one. A real display/body pair
+// no longer trips it. Not flagged alone: Sora, Bricolage Grotesque, Manrope,
+// Poppins, JetBrains Mono as a code face.
 
-// Matches `font-family: Inter, ...;` — Inter first in the list, quoted or not.
-const INTER_SINGLE = /font-family\s*:\s*['"]?Inter['"]?\s*,/gi;
+const FAMILY_DECLARATION =
+  /font-family\s*:\s*([^;}\n]+)|fontFamily\s*:\s*([^,}\n]+)|--font-(?:sans|display|heading|body)\s*:\s*([^;}\n]+)/gi;
 
 const DISPLAY_SLOP =
-  /['"](?:Space\s+Grotesk|Geist|Instrument\s+Serif|Fraunces|Syne|DM\s+Sans)['"]/g;
+  /['"]?(Space\s+Grotesk|Geist|Instrument\s+Serif|Fraunces|Syne|DM\s+Sans)['"]?/gi;
 
-const FEATURE_SETTINGS = /font-feature-settings\s*:/g;
+const HEADING_CONTEXT = /\bh1\b|\bh2\b|\bfont-(?:display|heading)\b|display\s*:|--font-display/i;
 
-const FONT_TOKEN = /--font-|fontFamily\s*:|theme\s*\(\s*--font/g;
 
-export const noSlopFont: DesignSlopRuleFn = (code, filePath, locator) => {
+const GENERIC_FALLBACK = /^(?:system-ui|-apple-system|sans-serif|ui-sans-serif|BlinkMacSystemFont|Segoe UI|Roboto|Helvetica Neue|Arial|Noto Sans)$/i;
+
+function familiesOf(declaration: string): string[] {
+  return declaration
+    .split(',')
+    .map((part) => part.trim().replace(/^['"]|['"]$/g, ''))
+    .filter((part) => part.length > 0 && !GENERIC_FALLBACK.test(part));
+}
+
+export const noSlopFont: DesignSlopRuleFn = (code, _filePath, locator) => {
   const findings: Omit<Diagnostic, 'filePath' | 'ruleId'>[] = [];
-  const hasFeatureSettings = FEATURE_SETTINGS.test(code);
-  const hasFontToken = FONT_TOKEN.test(code);
 
-  for (const hit of collectRegex(code, INTER_SINGLE)) {
-    if (hasFeatureSettings || hasFontToken) continue;
-    // only the "everything is Inter" case — skip config files declaring a family list
-    if (/tailwind\.config|theme\s*\.\s*extend|sans\s*:/.test(code)) continue;
-    const loc = toColumn(locator.getLineAndCharacterOfPosition(hit.index));
+  const declared: { family: string; index: number }[] = [];
+  for (const match of code.matchAll(FAMILY_DECLARATION)) {
+    const value = match[1] ?? match[2] ?? match[3] ?? '';
+    for (const family of familiesOf(value)) {
+      declared.push({ family, index: match.index ?? 0 });
+    }
+  }
+
+  const uniqueFamilies = new Set(declared.map((entry) => entry.family.toLowerCase()));
+  const interEntry = declared.find((entry) => /^inter$/i.test(entry.family));
+  // A project that declares font tokens or a theme fontFamily is choosing a
+  // type system on purpose, so a single-family file is not the AI default.
+  const declaresTypeSystem = /--font-[\w-]*\s*:/.test(code) || /fontFamily\s*:\s*\{/.test(code);
+  if (interEntry && uniqueFamilies.size === 1 && !declaresTypeSystem) {
     findings.push({
       severity: 'warning',
-      message: 'Inter as the single page font with no display hierarchy — AI default; pair with a distinctive display face or a token system + font-feature-settings',
-      ...loc,
+      message: 'Inter is the only font in the project with no display face — AI default; pair it with a distinctive heading family or declare a type scale token',
+      ...toColumn(locator.getLineAndCharacterOfPosition(interEntry.index)),
     });
   }
 
-  const isHeadingContext = /\bh1\b|\bh2\b|\bfont-(?:display|heading)\b|display\s*:/i.test(code);
+  const isHeadingContext = HEADING_CONTEXT.test(code);
   for (const hit of collectRegex(code, DISPLAY_SLOP)) {
-    if (!isHeadingContext && !/font-family/.test(code.slice(0, hit.index))) continue;
-    const loc = toColumn(locator.getLineAndCharacterOfPosition(hit.index));
+    const before = code.slice(0, hit.index);
+    const inFontDeclaration = /font-family\s*:\s*['"]?$/i.test(before.slice(-40));
+    if (!isHeadingContext && !inFontDeclaration) continue;
     findings.push({
       severity: 'warning',
-      message: `AI-converged display font (${hit.match}) — Space Grotesk/Geist/Instrument Serif/Fraunces/Syne/DM Sans are LLM defaults; pick a distinctive typeface`,
-      ...loc,
+      message: `AI-converged display font (${hit.match.replace(/['"]/g, '')}) — Space Grotesk/Geist/Instrument Serif/Fraunces/Syne/DM Sans are LLM defaults; pick a distinctive typeface`,
+      ...toColumn(locator.getLineAndCharacterOfPosition(hit.index)),
     });
   }
 
-  void filePath;
   return findings;
 };

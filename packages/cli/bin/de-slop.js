@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const COMMANDS = ['init', 'check', 'fix', 'mcp', 'intercept', 'report'];
+const COMMANDS = ['init', 'check', 'fix', 'mcp', 'intercept', 'report', 'prose', 'budget'];
 
 function cliVersion() {
   const packageJson = fileURLToPath(new URL('../package.json', import.meta.url));
@@ -15,12 +15,14 @@ const GLOBAL_HELP = `de-slop — anti AI-slop toolkit (v${cliVersion()})
 Usage: de-slop <command> [options]
 
 Commands:
-  init    Inisialisasi de-slop di proyek (config, store, pre-commit hook)
-  check   Scan kode untuk AI slop patterns
-  fix     Perbaiki slop secara otomatis (jika memungkinkan)
-  mcp     Jalankan MCP server untuk Cursor/Claude Code
-intercept  Cek keamanan package sebelum install (anti slopsquatting)
-  report     Jalankan semua guardrail + generate report
+  init       Set up de-slop in a project (config, store, pre-commit hook)
+  check      Scan code, markup, and docs for AI slop patterns
+  fix        Rewrite the fixable findings in place
+  prose      Score documents for AI writing tells
+  budget     Measure erosion and verbosity against a baseline
+  intercept  Check packages before install (anti slopsquatting)
+  report     Run every guardrail and write REPORT.md + report.json
+  mcp        Start the MCP server for Cursor and [CC]
 
 Run 'de-slop <command> --help' for command-specific options.
 `;

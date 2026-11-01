@@ -16,6 +16,11 @@ const EXEMPT_HEX =
 
 const TAILWIND_PURPLE = /\b(?:bg|text|border|from|to|via|ring|shadow)-(?:indigo|purple|violet)-(?:400|500|600|700)\b/g;
 
+// A real gradient, not the bare `from-`/`to-` substrings that also appear in
+// ordinary utilities. Tailwind v3 spells it `bg-gradient-to-*`, v4 `bg-linear-*`.
+const GRADIENT =
+  /\b(?:bg-gradient-to-[a-z]{1,2}|bg-linear-(?:to-[a-z]{1,2}|[0-9]+)|from-[a-z]+-[0-9]+\s+(?:via-[a-z]+-[0-9]+\s+)?to-[a-z]+-[0-9]+|linear-gradient\(|radial-gradient\()/;
+
 const TOKEN_STRIP =
   /(?::root\s*{[^}]*}|\.\w*-purple\s*{[^}]*}|\.\w*-indigo\s*{[^}]*}|\.\w*-violet\s*{[^}]*})/g;
 
@@ -27,8 +32,7 @@ export const noAiPurple: DesignSlopRuleFn = (code, _filePath, locator) => {
   const total = purpleHex.length + tailwindHits.length;
   if (total === 0) return [];
 
-  const hasGradient =
-    /gradient-to-|linear-gradient|from-|via-|to-/.test(stripped);
+  const hasGradient = GRADIENT.test(stripped);
 
   const severity = hasGradient && total >= 2 ? 'error' : 'warning';
   const samples = [...purpleHex.map((m) => m.match), ...tailwindHits.map((m) => m.match)]

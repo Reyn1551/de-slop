@@ -9,13 +9,20 @@ const root = resolve(__dirname, '..', '..');
 const serverEntry = join(root, 'packages/mcp-server/dist/index.js');
 
 describe('mcp server e2e', () => {
-  it('advertises all four tools', async () => {
+  it('advertises all six tools', async () => {
     const transport = new StdioClientTransport({ command: process.execPath, args: [serverEntry] });
     const client = new Client({ name: 'e2e', version: '1.0.0' });
     await client.connect(transport);
     const { tools } = await client.listTools();
     const names = tools.map((tool: any) => tool.name).sort();
-    expect(names).toEqual(['check_package', 'check_slop', 'spec_verify', 'verify_tests']);
+    expect(names).toEqual([
+      'check_package',
+      'check_prose',
+      'check_slop',
+      'check_ux',
+      'spec_verify',
+      'verify_tests',
+    ]);
     await client.close();
   });
 
@@ -65,5 +72,41 @@ describe('mcp server e2e', () => {
     expect(JSON.stringify(payload)).toContain('missing-function');
     await client.close();
     rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('check_prose scores a slop document', async () => {
+    const transport = new StdioClientTransport({ command: process.execPath, args: [serverEntry] });
+    const client = new Client({ name: 'e2e', version: '1.0.0' });
+    await client.connect(transport);
+    const result = await client.callTool({
+      name: 'check_prose',
+      arguments: {
+        text: "Great question! Let's dive in. This isn't just about code, it's about craft.\n\nThat's the real win.\n",
+      },
+    });
+    const payload = JSON.parse((result as any).content[0].text);
+    const ruleIds = payload.diagnostics.map((diagnostic: { ruleId: string }) => diagnostic.ruleId);
+    expect(ruleIds).toContain('no-chatbot-residue');
+    expect(ruleIds).toContain('no-staged-opener');
+    expect(payload.metrics.score).toBeGreaterThan(0);
+    await client.close();
+  });
+
+  it('check_ux flags an unlabeled icon button and missing alt text', async () => {
+    const transport = new StdioClientTransport({ command: process.execPath, args: [serverEntry] });
+    const client = new Client({ name: 'e2e', version: '1.0.0' });
+    await client.connect(transport);
+    const result = await client.callTool({
+      name: 'check_ux',
+      arguments: {
+        text: '<div><img src="/logo.png" /><button className="p-1"><svg /></button></div>',
+        path: 'src/Header.tsx',
+      },
+    });
+    const payload = JSON.parse((result as any).content[0].text);
+    const ruleIds = payload.diagnostics.map((diagnostic: { ruleId: string }) => diagnostic.ruleId);
+    expect(ruleIds).toContain('no-img-missing-alt');
+    expect(ruleIds).toContain('no-icon-button-unlabeled');
+    await client.close();
   });
 });

@@ -6,3 +6,5 @@ export { checkPackage, checkPackages, checkPackageManifest } from './gate';
 export type { ScriptFindings } from './gate';
 export { parseInstallCommand, checkInstallScript } from './intercept';
 export type { InstallCommand } from './intercept';
+export { findTyposquat, editDistance, normalizePackageName, corpusSize } from './typosquat';
+export type { TyposquatMatch } from './typosquat';

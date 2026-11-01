@@ -435,23 +435,29 @@ describe('no-magic-string', () => {
   });
 });
 
-describe('no-hero-pill', () => {
+describe('no-pill-class-string', () => {
   it('flags hero-pill class pattern in JSX', () => {
     const code = 'export function Hero() {\n  return <span className="hero-pill">New</span>;\n}\n';
-    const diags = scanSource(code, 'hero.tsx', { rules: ['no-hero-pill'] });
-    expect(diags.some((d) => d.ruleId === 'no-hero-pill')).toBe(true);
+    const diags = scanSource(code, 'hero.tsx', { rules: ['no-pill-class-string'] });
+    expect(diags.some((d) => d.ruleId === 'no-pill-class-string')).toBe(true);
   });
 
   it('skips normal class names', () => {
     const code = 'export function Btn() {\n  return <button className="btn-primary">Click</button>;\n}\n';
-    const diags = scanSource(code, 'btn.tsx', { rules: ['no-hero-pill'] });
-    expect(diags.some((d) => d.ruleId === 'no-hero-pill')).toBe(false);
+    const diags = scanSource(code, 'btn.tsx', { rules: ['no-pill-class-string'] });
+    expect(diags.some((d) => d.ruleId === 'no-pill-class-string')).toBe(false);
   });
 
   it('skips legit badge classes (preset-badge, quality-badge)', () => {
     const code = 'export function Card() {\n  return <span className="preset-badge">Popular</span>;\n}\n';
-    const diags = scanSource(code, 'card.tsx', { rules: ['no-hero-pill'] });
-    expect(diags.some((d) => d.ruleId === 'no-hero-pill')).toBe(false);
+    const diags = scanSource(code, 'card.tsx', { rules: ['no-pill-class-string'] });
+    expect(diags.some((d) => d.ruleId === 'no-pill-class-string')).toBe(false);
+  });
+
+  it('skips product copy that merely contains the word pill', () => {
+    const code = 'const label = "new pill inventory";\nconst other = "live pill count";\n';
+    const diags = scanSource(code, 'pharmacy.ts', { rules: ['no-pill-class-string'] });
+    expect(diags.some((d) => d.ruleId === 'no-pill-class-string')).toBe(false);
   });
 });
 

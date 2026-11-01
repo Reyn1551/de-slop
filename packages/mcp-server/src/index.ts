@@ -76,6 +76,37 @@ function registerTools(server: McpServer): void {
       return textResult(result);
     },
   );
+
+  server.tool(
+    'check_prose',
+    'Score documentation for AI writing tells: not-X-but-Y contrasts, staged openers, chatbot residue, inflated significance, AI vocabulary, dash overload, bold-label lists, closers',
+    {
+      text: z.string().optional().describe('Raw prose to score'),
+      path: z.string().optional().describe('Path to a Markdown or text file to score'),
+      rules: z.array(z.string()).optional().describe('Only run these rule ids'),
+    },
+    async ({ text, path, rules }) => {
+      const { analyzeProse } = await import('@de-slop/core/prose-slop');
+      const source = text ?? (path ? await readFile(path, 'utf8') : '');
+      const result = analyzeProse(source, path ?? 'stdin.md', rules ? { rules } : {});
+      return textResult(result);
+    },
+  );
+
+  server.tool(
+    'check_ux',
+    'Check JSX/HTML/CSS for provable accessibility and interaction failures: missing alt text, unlabeled icon buttons, removed focus rings, placeholder-only labels, blocked zoom, small touch targets, motion without reduced-motion, off-grid spacing',
+    {
+      text: z.string().optional().describe('Raw markup or CSS to check'),
+      path: z.string().optional().describe('Path to a markup or CSS file to check'),
+      rules: z.array(z.string()).optional().describe('Only run these rule ids'),
+    },
+    async ({ text, path, rules }) => {
+      const { scanUx } = await import('@de-slop/core/ux-guard');
+      const source = text ?? (path ? await readFile(path, 'utf8') : '');
+      return textResult({ diagnostics: scanUx(source, path ?? 'stdin.tsx', rules ? { rules } : {}) });
+    },
+  );
 }
 
 export async function startMcpServer(): Promise<void> {

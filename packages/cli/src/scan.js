@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { extname } from 'node:path';
-import { agentGuardScan, designSlopScan, guardSource, scanSource } from '@de-slop/core';
+import { agentGuardScan, designSlopScan, guardSource, scanProse, scanSource, scanUx } from '@de-slop/core';
 
 const CODE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.json']);
-const DOC_EXTENSIONS = new Set(['.md', '.mdx', '.txt', '.rst']);
+const DOC_EXTENSIONS = new Set(['.md', '.mdx', '.txt', '.rst', '.adoc']);
+const MARKUP_EXTENSIONS = new Set(['.tsx', '.jsx', '.html', '.htm', '.vue', '.svelte', '.astro', '.css']);
 
 /**
  * Run the slop-scanner, the runtime-guard and the agent-guard over one file
@@ -28,6 +29,7 @@ export function scanFile(filePath, rules) {
 
   const ext = extname(filePath);
   const isCode = CODE_EXTENSIONS.has(ext);
+  const isDoc = DOC_EXTENSIONS.has(ext);
 
   const diagnostics = [];
   if (isCode) {
@@ -74,6 +76,36 @@ export function scanFile(filePath, rules) {
       line: 0,
       column: 0,
     });
+  }
+
+  if (isDoc) {
+    try {
+      diagnostics.push(...scanProse(code, filePath, options));
+    } catch (err) {
+      diagnostics.push({
+        ruleId: 'scan-error',
+        severity: 'error',
+        message: `failed to scan prose: ${err.message}`,
+        filePath,
+        line: 0,
+        column: 0,
+      });
+    }
+  }
+
+  if (MARKUP_EXTENSIONS.has(ext)) {
+    try {
+      diagnostics.push(...scanUx(code, filePath, options));
+    } catch (err) {
+      diagnostics.push({
+        ruleId: 'scan-error',
+        severity: 'error',
+        message: `failed to scan ux: ${err.message}`,
+        filePath,
+        line: 0,
+        column: 0,
+      });
+    }
   }
 
   return diagnostics;

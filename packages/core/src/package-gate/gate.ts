@@ -1,5 +1,6 @@
 import { fetchNpmDownloads, fetchNpmInfo, fetchPypiInfo } from './registry';
 import { decideVerdict, DEFAULT_TIMEOUT_MS } from './verdict';
+import { findTyposquat } from './typosquat';
 import type { Ecosystem, GateOptions, PackageReport } from './types';
 
 const SUSPICIOUS_SCRIPT_PATTERNS = [
@@ -35,7 +36,11 @@ export async function checkPackage(
       return { name, ecosystem, verdict: 'unknown', reasons: ['failed to reach npm registry'] };
     }
 
-    const { verdict, reasons } = decideVerdict({ ...info, weeklyDownloads }, options);
+    const { verdict, reasons } = decideVerdict(
+      { ...info, weeklyDownloads },
+      options,
+      findTyposquat(name, 'npm'),
+    );
     return { name, ecosystem, verdict, reasons, ageInDays: info.ageInDays, weeklyDownloads };
   }
 
@@ -44,7 +49,7 @@ export async function checkPackage(
     return { name, ecosystem, verdict: 'unknown', reasons: ['failed to reach PyPI registry'] };
   }
 
-  const { verdict, reasons } = decideVerdict(info, options);
+  const { verdict, reasons } = decideVerdict(info, options, findTyposquat(name, 'pypi'));
   return { name, ecosystem, verdict, reasons, ageInDays: info.ageInDays };
 }
 

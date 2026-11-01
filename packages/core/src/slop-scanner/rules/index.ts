@@ -6,7 +6,7 @@ import { noDebugLogging } from './no-debug-logging';
 import { noEmptyCatch } from './no-empty-catch';
 import { noGenericName } from './no-generic-name';
 import { noHardcodedSecret } from './no-hardcoded-secret';
-import { noHeroPill } from './no-hero-pill';
+import { noPillClassString } from './no-pill-class-string';
 import { noInjectionRisk } from './no-injection-risk';
 import { noUnsafeInnerHtml } from './no-unsafe-innerhtml';
 import { noMagicString } from './no-magic-string';
@@ -33,6 +33,6 @@ export const rules: Rule[] = [
   noDebugLogging,
   noCodeBloat,
   noMagicString,
-  noHeroPill,
+  noPillClassString,
   noUnsafeInnerHtml,
 ];

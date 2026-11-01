@@ -1,42 +1,40 @@
 import type { DesignSlopRuleFn } from '../types';
 import { toColumn } from '../utils';
 
-// Animated gradient blobs: blur-2xl/3xl + rounded-full + translucent color + infinite animation.
-// Warning standalone; contributes to bundle. Must check for prefers-reduced-motion guard.
-// Matched on whole className strings so bg-before-blur order does not matter.
+// Animated gradient blobs: blur-2xl/3xl + rounded-full + translucent color.
+// Warning standalone; error when that same element also animates and the file
+// carries no reduced-motion guard. Animation is checked on the blob's own
+// className, not file-wide: a spinner elsewhere in the file used to escalate
+// every static blob.
 
 const CLASSNAME = /["'`]([^"'`]*?(?:rounded-full|blur-(?:2xl|3xl))[^"'`]*)["'`]/g;
 
 const BLUR = /\bblur-(?:2xl|3xl)\b/;
 const ROUNDED = /\brounded-full\b/;
-const COLORED_BG = /\b(?:bg|from|to|via)-(?:indigo|purple|violet|blue|pink|cyan|emerald|teal|fuchsia|rose)-[0-9]+\//;
+const COLORED_BG = /\b(?:bg|from|to|via)-(?:indigo|purple|violet|blue|pink|cyan|emerald|teal|fuchsia|rose)-[0-9]+(?:\/[0-9]+)?\b/;
+const ANIMATION = /\banimate-(?:\[[^\]]+\]|[a-z][\w-]*)/;
 
-const ANIMATE_INFINITE =
-  /animate-\[?[a-z]+[^\]"';{}]*(?:infinite)?|@keyframes\s+(?:blob|float|pulse|drift|aurora)/g;
-
-const REDUCED_MOTION =
-  /prefers-reduced-motion|motion-reduce:/g;
+const REDUCED_MOTION = /prefers-reduced-motion|motion-reduce:/;
 
 export const noGradientBlob: DesignSlopRuleFn = (code, _filePath, locator) => {
-  const blobIndexes: number[] = [];
-  for (const m of code.matchAll(CLASSNAME)) {
-    const cls = m[1];
-    if (BLUR.test(cls) && ROUNDED.test(cls) && COLORED_BG.test(cls)) {
-      blobIndexes.push(m.index ?? 0);
-    }
+  const blobs: { index: number; animated: boolean }[] = [];
+  for (const match of code.matchAll(CLASSNAME)) {
+    const className = match[1];
+    if (!BLUR.test(className) || !ROUNDED.test(className) || !COLORED_BG.test(className)) continue;
+    blobs.push({ index: match.index ?? 0, animated: ANIMATION.test(className) });
   }
-  if (blobIndexes.length === 0) return [];
+  if (blobs.length === 0) return [];
 
-  const hasAnimation = ANIMATE_INFINITE.test(code);
-  const hasReducedMotionGuard = REDUCED_MOTION.test(code);
+  const animatedBlobs = blobs.filter((blob) => blob.animated);
+  const unguarded = animatedBlobs.length > 0 && !REDUCED_MOTION.test(code);
+  const anchor = (unguarded ? animatedBlobs[0] : blobs[0]).index;
+  const loc = toColumn(locator.getLineAndCharacterOfPosition(anchor));
 
-  const loc = toColumn(locator.getLineAndCharacterOfPosition(blobIndexes[0]));
-  const animated = hasAnimation && !hasReducedMotionGuard;
   return [{
-    severity: animated ? 'error' : 'warning',
-    message: animated
-      ? `${blobIndexes.length} animated gradient blob(s) without prefers-reduced-motion guard — the signature AI hero cliché; add motion-reduce: or remove the animation`
-      : `${blobIndexes.length} decorative gradient blob(s) (blur + rounded-full) — AI hero background cliché; a single slow static gradient or real imagery reads more intentional`,
+    severity: unguarded ? 'error' : 'warning',
+    message: unguarded
+      ? `${animatedBlobs.length} animated gradient blob(s) without a prefers-reduced-motion guard — the signature AI hero cliché; add motion-reduce: or remove the animation`
+      : `${blobs.length} decorative gradient blob(s) (blur + rounded-full) — AI hero background cliché; a single slow static gradient or real imagery reads more intentional`,
     ...loc,
   }];
 };

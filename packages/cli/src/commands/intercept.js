@@ -46,7 +46,7 @@ export default async function intercept(argv) {
     } else {
       console.log(line);
     }
-    if (report.verdict === 'suspicious' || report.verdict === 'not-found') {
+    if (report.verdict === 'suspicious' || report.verdict === 'not-found' || report.verdict === 'typosquat') {
       blocked = true;
     }
   }

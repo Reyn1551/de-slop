@@ -1,29 +1,27 @@
 import type { DesignSlopRuleFn } from '../types';
 import { collectRegex, toColumn } from '../utils';
 
-// Colored glow shadows (shadow-{color}/{alpha} or shadow with hue) — warning when 2+ elements.
-// Exclude focus-visible:ring-* (legit) and inset shadows.
+// Colored glow shadows (shadow-{color}/{alpha} or a box-shadow with a hue).
+// Warning at 2+ elements. Focus rings are excluded by class token, not by a
+// character window: the old ±200-character sweep silenced unrelated shadows
+// near a focus ring and missed rings declared further away.
 
-const GLOW_SHADOW =
-  /(?:box-shadow\s*:\s*[^;]*(?:indigo|purple|violet|blue|pink|cyan|emerald|teal|fuchsia|rose)[^;]*;)|shadow-(?:indigo|purple|violet|blue|pink|cyan|emerald|teal|fuchsia|rose)-(?:400|500|600)(?:\/[0-9]+)?/g;
-
-const FOCUS_RING = /focus-visible\s*:\s*ring/g;
+const GLOW_CLASS = /\bshadow-(?:indigo|purple|violet|blue|pink|cyan|emerald|teal|fuchsia|rose|amber|lime|green|red|orange)-(?:300|400|500|600)(?:\/[0-9]+)?\b/g;
+const GLOW_DECLARATION =
+  /box-shadow\s*:\s*[^;}]*(?:indigo|purple|violet|blue|pink|cyan|emerald|teal|fuchsia|rose|amber|lime|green|red|orange)[^;}]*/g;
+const FOCUS_RING = /focus-visible:ring|focus:ring/g;
 
 export const noGlowShadow: DesignSlopRuleFn = (code, _filePath, locator) => {
-  const focusHits = collectRegex(code, FOCUS_RING);
-  const focusIndexes = new Set<number>();
-  for (const f of focusHits) {
-    // block out the region containing the focus ring
-    for (let i = Math.max(0, f.index - 200); i <= f.index + 200; i++) focusIndexes.add(i);
-  }
+  const hits = [...collectRegex(code, GLOW_CLASS), ...collectRegex(code, GLOW_DECLARATION)]
+    .filter((hit) => !FOCUS_RING.test(hit.match))
+    .sort((a, b) => a.index - b.index);
 
-  const glowHits = collectRegex(code, GLOW_SHADOW).filter((h) => !focusIndexes.has(h.index));
-  if (glowHits.length < 2) return [];
+  if (hits.length < 2) return [];
 
-  const loc = toColumn(locator.getLineAndCharacterOfPosition(glowHits[0].index));
+  const loc = toColumn(locator.getLineAndCharacterOfPosition(hits[0].index));
   return [{
     severity: 'warning',
-    message: `${glowHits.length} colored glow shadows — AI depth default; use neutral shadows for depth, solid color for identity (Josh Comeau: hue-matched desaturated shadows are the legit alternative)`,
+    message: `${hits.length} colored glow shadows — AI depth default; use neutral shadows for depth, solid color for identity (hue-matched desaturated shadows are the legit alternative)`,
     ...loc,
   }];
 };

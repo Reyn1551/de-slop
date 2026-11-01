@@ -174,6 +174,46 @@ export default function Post() {
     expect(diags.some((d) => d.ruleId === 'no-emoji-as-icon')).toBe(false);
   });
 
+  it('does not flag grey text outside the dark region', () => {
+    const mixed = `
+export default function Page() {
+  return (
+    <div>
+      <section className="bg-white">
+        <p className="text-slate-500">Caption on a light card.</p>
+      </section>
+      <section className="bg-slate-950">
+        <p className="text-slate-100">Readable copy.</p>
+      </section>
+    </div>
+  );
+}`;
+    const diags = scanDesignSlop(mixed, '/tmp/mixed.tsx');
+    expect(diags.some((d) => d.ruleId === 'no-dark-grey-text')).toBe(false);
+  });
+
+  it('flags grey text nested inside a dark region', () => {
+    const dark = `
+export default function Card() {
+  return (
+    <div className="bg-slate-950 p-6">
+      <h2 className="text-white">Title</h2>
+      <p className="text-slate-500">Muted body copy.</p>
+    </div>
+  );
+}`;
+    const diags = scanDesignSlop(dark, '/tmp/card.tsx');
+    const hit = diags.find((d) => d.ruleId === 'no-dark-grey-text');
+    expect(hit?.severity).toBe('error');
+  });
+
+  it('flags grey text inside a CSS rule with a dark background', () => {
+    const dark = `.panel { background: #0b0b0b; @apply text-slate-500; }\n`;
+    const light = `.note { background: #fafafa; @apply text-slate-500; }\n`;
+    expect(scanDesignSlop(dark, '/tmp/panel.css').some((d) => d.ruleId === 'no-dark-grey-text')).toBe(true);
+    expect(scanDesignSlop(light, '/tmp/panel.css').some((d) => d.ruleId === 'no-dark-grey-text')).toBe(false);
+  });
+
   it('bundle: >=4 tells in one file => design-slop-bundle error', () => {
     const diags = scanDesignSlop(SLOP_TSX, '/tmp/hero.tsx');
     const bundle = diags.find((d) => d.ruleId === 'design-slop-bundle');

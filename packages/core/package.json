@@ -14,7 +14,10 @@
     "./runtime-guard": "./dist/runtime-guard/index.js",
     "./ast-pruner": "./dist/ast-pruner/index.js",
     "./agent-guard": "./dist/agent-guard/index.js",
-    "./design-slop": "./dist/design-slop/index.js"
+    "./design-slop": "./dist/design-slop/index.js",
+    "./prose-slop": "./dist/prose-slop/index.js",
+    "./ux-guard": "./dist/ux-guard/index.js",
+    "./degradation": "./dist/degradation/index.js"
   },
   "files": [
     "dist"

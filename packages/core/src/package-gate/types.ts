@@ -1,5 +1,5 @@
 export type Ecosystem = 'npm' | 'pypi';
-export type Verdict = 'ok' | 'suspicious' | 'not-found' | 'unknown';
+export type Verdict = 'ok' | 'suspicious' | 'not-found' | 'unknown' | 'typosquat';
 
 export interface PackageReport {
   name: string;
