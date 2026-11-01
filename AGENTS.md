@@ -44,7 +44,7 @@ Rule baru = satu file di `rules/` plus satu baris di registry `index.ts`. Id rul
 
 ```bash
 npm run build       # tsc core + mcp-server ke dist
-npm test            # vitest, 390 test
+npm test            # vitest, 399 test
 npm run typecheck   # tsc --noEmit core + mcp-server
 node packages/cli/bin/de-slop.js check .   # butuh build dulu
 ```

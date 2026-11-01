@@ -102,7 +102,7 @@ writes the client config.
 
 ```bash
 npm run build       # tsc core + mcp-server into dist
-npm test            # vitest, 390 tests
+npm test            # vitest, 399 tests
 npm run typecheck   # tsc --noEmit
 ```
 

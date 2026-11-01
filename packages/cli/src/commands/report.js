@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { checkPackages } from '@de-slop/core';
+import { analyzeProject, checkPackages, HUMAN_EROSION_BASELINE, HUMAN_VERBOSITY_BASELINE } from '@de-slop/core';
 import { verifyTestFile } from '@de-slop/core/test-lock';
 import { parseArgs } from '../args.js';
 import { findSourceFiles } from '../files.js';
@@ -15,8 +15,7 @@ Runs every de-slop module against the target and writes:
   report.json         raw machine-readable data
 
 Checks included:
-  slop-scanner       9 rules (slop, security, hallucination, naming)
-  runtime-guard      3 rules (edge cases, leaks)
+  every detector that applies to each file (code, markup, docs)
   test-lock          test files vs locked fingerprint
   package-gate       every dependency in package.json
   spec-contractor    if a de-slop.spec.yml exists
@@ -77,6 +76,10 @@ function markdownReport(data) {
   lines.push(`- Dependencies audited: **${data.packages.length}**`);
   lines.push(`- Test files locked: **${data.testLock.locked}**`);
   lines.push(`- Specs checked: **${data.spec.length}**`);
+  if (data.degradation) {
+    lines.push(`- Erosion: **${data.degradation.erosion.toFixed(3)}** (human mean ${HUMAN_EROSION_BASELINE})`);
+    lines.push(`- Verbosity: **${data.degradation.verbosity.toFixed(3)}** (human mean ${HUMAN_VERBOSITY_BASELINE})`);
+  }
   lines.push(`- **${totals.errors} errors, ${totals.warnings} warnings, ${totals.info} ok**`);
   lines.push('');
 
@@ -94,9 +97,24 @@ function markdownReport(data) {
     lines.push('');
   }
 
+  if (data.degradation) {
+    lines.push('## Degradation');
+    lines.push('');
+    lines.push('| File | Erosion | Verbosity | Max CC |');
+    lines.push('|---|---|---|---|');
+    const worst = [...data.degradation.files]
+      .sort((a, b) => b.erosion - a.erosion)
+      .slice(0, 10)
+      .filter((file) => file.erosion > 0 || file.verbosity > 0);
+    for (const file of worst) {
+      lines.push(`| \`${file.filePath}\` | ${file.erosion.toFixed(3)} | ${file.verbosity.toFixed(3)} | ${file.maxCyclomatic} |`);
+    }
+    lines.push('');
+  }
+
   const risky = data.packages.filter((p) => p.verdict !== 'ok');
   if (risky.length > 0) {
-    lines.push('## Package Gate — at-risk dependencies');
+    lines.push('## Package gate: at-risk dependencies');
     lines.push('');
     lines.push('| Package | Ecosystem | Verdict | Reasons |');
     lines.push('|---|---|---|---|');
@@ -135,7 +153,7 @@ function markdownReport(data) {
     }
   }
   if (byRule.size > 0) {
-    lines.push('## Analysis — rule frequency');
+    lines.push('## Rule frequency');
     lines.push('');
     const sorted = [...byRule.entries()].sort((a, b) => b[1] - a[1]);
     for (const [rule, count] of sorted) {
@@ -199,10 +217,21 @@ export default async function report(argv) {
     // no spec file — skip
   }
 
+  const sources = [];
+  for (const filePath of files) {
+    if (!/\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs)$/.test(filePath)) continue;
+    try {
+      sources.push({ filePath, code: readFileSync(filePath, 'utf8') });
+    } catch {
+      continue;
+    }
+  }
+
   const data = {
     generatedAt: new Date().toISOString(),
     target,
     files: diagnosticsByFile,
+    degradation: sources.length > 0 ? analyzeProject(sources) : null,
     packages: packageReports,
     testLock: { locked: lockedCount, violations: testViolations },
     spec: specResults,
