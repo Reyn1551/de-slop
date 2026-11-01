@@ -4,14 +4,24 @@ type Locator = { getLineAndCharacterOfPosition(pos: number): { line: number; cha
 
 const INSTALL_RE = /(?:\b(pip|pip3|pipx|npm|yarn|pnpm|gem|bundle|cargo|go|composer|apt(?:-get)?|apk|dnf|yum|brew)\s+install\b|^\s*(?:pip|npm|yarn|pnpm|gem)\s+install\b)/gim;
 
-// Capture the package names from an install command (everything after the
-// command words, up to flags / end of line).
+// Capture the package names from an install command: everything after the
+// command words, up to a flag, a closing quote, or the end of the line.
+//
+// The closing quote matters. `de-slop intercept 'npm install <nama-package>'`
+// ends at the quote, and reading past it pulled the following prose ("Kalau
+// package") in as package names.
 function packageArgs(line: string): string {
   const command = line.match(INSTALL_RE);
   if (!command) return '';
-  const after = line.slice(line.indexOf(command[0]) + command[0].length);
-  return after.split(/\s+(?:--?[a-z]|-[a-z])/i)[0] ?? after;
+  const offset = line.indexOf(command[0]) + command[0].length;
+  const after = line.slice(offset);
+  const stop = after.search(/['"`]|\s+(?:--?[a-z]|-[a-z])/i);
+  return stop === -1 ? after : after.slice(0, stop);
 }
+
+// A placeholder names the shape of a package, not a package. Reporting one as
+// unpinned asks the reader to pin a word that will never be installed.
+const PLACEHOLDER = /^<[^>]*>$|^\{[^}]*\}$|^\.\.\.$|^(?:pkg|package|nama-package|name|module|lib)$/i;
 
 function pinnedVersion(pkgSpec: string): boolean {
   return /[=@~><]/.test(pkgSpec) || /#\w+/.test(pkgSpec);
@@ -63,7 +73,10 @@ export function noUnsafeInstallDocs(
     const lineEnd = code.indexOf('\n', match.index);
     const line = code.slice(lineStart, lineEnd === -1 ? code.length : lineEnd);
 
-    const pkgSpecs = packageArgs(line).split(/\s+/).filter((s) => s && !s.startsWith('-'));
+    const pkgSpecs = packageArgs(line)
+      .split(/\s+/)
+      .map((spec) => spec.replace(/^[\s'"`]+|[\s'"`]+$/g, ''))
+      .filter((spec) => spec.length > 0 && !spec.startsWith('-') && !PLACEHOLDER.test(spec));
     for (const spec of pkgSpecs) {
       if (/^(?:--|install|dev|save|save-dev|g|global)$/i.test(spec)) continue;
       if (pinnedVersion(spec)) continue;

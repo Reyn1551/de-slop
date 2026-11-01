@@ -196,6 +196,16 @@ describe('no-destructive-command', () => {
 });
 
 describe('no-unsafe-install-docs', () => {
+  it('ignores a placeholder between angle brackets', () => {
+    const doc = "de-slop intercept 'npm install <nama-package>'\n";
+    expect(agentGuardScan(doc, 'AGENTS.md').some((d) => d.ruleId === 'no-unsafe-install-docs')).toBe(false);
+  });
+
+  it('ignores prose after a quoted command', () => {
+    const doc = "Run `de-slop intercept 'pip install <nama-package>'`. Kalau package ditandai, jangan install.\n";
+    expect(agentGuardScan(doc, 'AGENTS.md').some((d) => d.ruleId === 'no-unsafe-install-docs')).toBe(false);
+  });
+
   it('flags unpinned pip install in README.md', () => {
     const code = 'Run:\n```bash\npip install flask\n```\n';
     const diags = agentGuardScan(code, 'README.md', { rules: ['no-unsafe-install-docs'] });
