@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import {
   verifyTestFile,
   checkPackageManifest,
-  scanContent,
+  scanBatch,
   scanContextRot,
   collectRepoFacts,
   isAgentConfig,
@@ -94,9 +94,8 @@ export default async function check(argv) {
   const diagnostics = [];
   const sources = [];
   for (const filePath of files) {
-    let code;
     try {
-      code = readFileSync(filePath, 'utf8');
+      sources.push({ filePath, code: readFileSync(filePath, 'utf8') });
     } catch (err) {
       diagnostics.push({
         ruleId: 'scan-error',
@@ -106,18 +105,23 @@ export default async function check(argv) {
         line: 0,
         column: 0,
       });
-      continue;
     }
-    sources.push({ filePath, code });
-    diagnostics.push(
-      ...scanContent(code, filePath, {
-        ...(rules ? { rules } : {}),
-        contract: contract.value,
-        hasContract: contract.value !== null,
-      }),
-    );
-    if (contract.value !== null) {
-      diagnostics.push(...designContractScan(code, filePath, { contract: contract.value }));
+  }
+
+  // One parse session for the whole run: a snapshot per file made a
+  // repository-wide scan quadratic.
+  const scanned = scanBatch(sources, {
+    ...(rules ? { rules } : {}),
+    contract: contract.value,
+    hasContract: contract.value !== null,
+  });
+  for (const result of scanned) {
+    diagnostics.push(...result.diagnostics);
+  }
+
+  if (contract.value !== null) {
+    for (const source of sources) {
+      diagnostics.push(...designContractScan(source.code, source.filePath, { contract: contract.value }));
     }
   }
 

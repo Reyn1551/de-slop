@@ -61,11 +61,18 @@ Every AST module imports `packages/core/src/slop-scanner/ts-api.ts`, which
 `require`s `typescript/unstable/ast`, `typescript/unstable/fs`, and
 `typescript/unstable/sync` and exposes a virtual filesystem.
 
-`parseSourceFile(code, filePath)` writes the source into that virtual FS under a
-ring of 512 slots, then reads the `SourceFile` back from a snapshot. The ring
-exists because an MCP server runs for a whole session: without it the virtual FS
-grows with every file scanned. A `SourceFile` materializes its text on creation,
-so reusing a slot cannot corrupt an earlier result.
+`ParseSession` owns a virtual filesystem, one API over it, and one snapshot per
+run. `parseAll` writes every source into that filesystem and takes a single
+snapshot, which is what makes a whole-repository scan linear.
+
+Snapshot cost grows with what it already holds, so a snapshot per file is
+quadratic: 187 files took 126 seconds, and the same files take 687 milliseconds
+through one session. `scanBatch` is the entry point that does this, and the CLI
+uses it.
+
+The three AST modules (slop-scanner, runtime-guard, agent-guard) share the tree
+that `scanBatch` parsed. Before that, each module called `parseSourceFile` on its
+own, so every file was parsed three times.
 
 Rules are written in the classic style (`ast.isX`, `SyntaxKind`,
 `forEachChild`), so porting to a different parser means replacing `ts-api.ts`

@@ -15,7 +15,13 @@ export interface AgentGuardOptions {
   rules?: string[];
 }
 
-const TEXT_RULES = new Set(['no-invisible-unicode', 'no-unsafe-install-docs', 'no-vite-boilerplate']);
+export const TEXT_RULE_IDS: Record<string, true> = {
+  'no-invisible-unicode': true,
+  'no-unsafe-install-docs': true,
+  'no-vite-boilerplate': true,
+};
+
+const TEXT_RULES = new Set(Object.keys(TEXT_RULE_IDS));
 
 const CODE_EXTENSIONS = /\.(ts|tsx|js|jsx|mts|cts|mjs|cjs|json)$/;
 
@@ -41,6 +47,8 @@ export function agentGuardScan(
   code: string,
   filePath: string,
   options: AgentGuardOptions = {},
+  /** A tree the caller already parsed, so a batch scan parses once. */
+  preParsed?: import('../slop-scanner/ts-api').SourceFile,
 ): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   const isCode = CODE_EXTENSIONS.test(filePath);
@@ -48,7 +56,7 @@ export function agentGuardScan(
 
   let sourceFile: ReturnType<typeof parseSourceFile> | null = null;
   if (isCode) {
-    sourceFile = parseSourceFile(code, filePath);
+    sourceFile = preParsed ?? parseSourceFile(code, filePath);
     const active = options.rules
       ? agentGuardRules.filter((r) => options.rules!.includes(r.id))
       : agentGuardRules;

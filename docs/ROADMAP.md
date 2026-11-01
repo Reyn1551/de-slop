@@ -52,7 +52,7 @@ positives that made the tool noisy on its own source.
 - [x] `slop-scanner`: `no-missing-docs` limited to exported functions and classes
 - [x] `slop-scanner`: `no-magic-string` requires a real TLD, skips tests
 - [x] `runtime-guard`: exact nullable method names, declared async callees only
-- [x] Parser bridge: virtual FS slots wrap at 512
+- [x] Parser bridge: one parse session per run, shared by the AST modules
 
 ## v0.6: Research and editor
 
