@@ -1,4 +1,5 @@
 import type { DesignSlopRuleFn, Diagnostic } from '../types';
+import { isExemptFont } from '../../design-contract/exemptions';
 import { collectRegex, toColumn } from '../utils';
 
 // Two font tells:
@@ -29,7 +30,7 @@ function familiesOf(declaration: string): string[] {
     .filter((part) => part.length > 0 && !GENERIC_FALLBACK.test(part));
 }
 
-export const noSlopFont: DesignSlopRuleFn = (code, _filePath, locator) => {
+export const noSlopFont: DesignSlopRuleFn = (code, _filePath, locator, contract) => {
   const findings: Omit<Diagnostic, 'filePath' | 'ruleId'>[] = [];
 
   const declared: { family: string; index: number }[] = [];
@@ -45,7 +46,8 @@ export const noSlopFont: DesignSlopRuleFn = (code, _filePath, locator) => {
   // A project that declares font tokens or a theme fontFamily is choosing a
   // type system on purpose, so a single-family file is not the AI default.
   const declaresTypeSystem = /--font-[\w-]*\s*:/.test(code) || /fontFamily\s*:\s*\{/.test(code);
-  if (interEntry && uniqueFamilies.size === 1 && !declaresTypeSystem) {
+  const declaredTypeface = interEntry !== undefined && isExemptFont(contract ?? null, interEntry.family);
+  if (interEntry && uniqueFamilies.size === 1 && !declaresTypeSystem && !declaredTypeface) {
     findings.push({
       severity: 'warning',
       message: 'Inter is the only font in the project with no display face — AI default; pair it with a distinctive heading family or declare a type scale token',
@@ -58,6 +60,7 @@ export const noSlopFont: DesignSlopRuleFn = (code, _filePath, locator) => {
     const before = code.slice(0, hit.index);
     const inFontDeclaration = /font-family\s*:\s*['"]?$/i.test(before.slice(-40));
     if (!isHeadingContext && !inFontDeclaration) continue;
+    if (isExemptFont(contract ?? null, hit.match.replace(/['"]/g, ''))) continue;
     findings.push({
       severity: 'warning',
       message: `AI-converged display font (${hit.match.replace(/['"]/g, '')}) — Space Grotesk/Geist/Instrument Serif/Fraunces/Syne/DM Sans are LLM defaults; pick a distinctive typeface`,

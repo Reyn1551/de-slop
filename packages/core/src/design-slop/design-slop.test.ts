@@ -226,6 +226,55 @@ export default function Card() {
     expect(diags).toHaveLength(0);
   });
 
+  it('declared purple stops being flagged', () => {
+    const code = '<div className="bg-indigo-500/20 text-indigo-400">accent</div>';
+    const contract = {
+      path: 'DESIGN.md',
+      version: 'alpha',
+      colors: new Map([['indigo', '#6366f1']]),
+      typography: new Map<string, string>(),
+      rounded: new Map<string, string>(),
+      omitted: [],
+      raw: '',
+    };
+    const without = scanDesignSlop(code, '/tmp/a.tsx');
+    const withContract = scanDesignSlop(code, '/tmp/a.tsx', { contract, hasContract: true });
+    expect(without.some((d) => d.ruleId === 'no-ai-purple')).toBe(true);
+    expect(withContract.some((d) => d.ruleId === 'no-ai-purple')).toBe(false);
+  });
+
+  it('declared Inter stops being flagged as a single font', () => {
+    const code = 'body { font-family: Inter, system-ui, sans-serif; }';
+    const contract = {
+      path: 'DESIGN.md',
+      version: 'alpha',
+      colors: new Map<string, string>(),
+      typography: new Map([['sans', 'Inter, system-ui, sans-serif']]),
+      rounded: new Map<string, string>(),
+      omitted: [],
+      raw: '',
+    };
+    expect(scanDesignSlop(code, '/tmp/a.css').some((d) => d.ruleId === 'no-slop-font')).toBe(true);
+    expect(
+      scanDesignSlop(code, '/tmp/a.css', { contract, hasContract: true }).some((d) => d.ruleId === 'no-slop-font'),
+    ).toBe(false);
+  });
+
+  it('bundle threshold drops to 3 when the project has no contract', () => {
+    const three = `
+export default function Hero() {
+  return (
+    <div className="bg-black min-h-screen">
+      <div className="blur-3xl rounded-full bg-purple-600/20" />
+      <a className="bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2">Go</a>
+      <p className="text-slate-500">Muted copy on a dark page.</p>
+    </div>
+  );
+}`;
+    const without = scanDesignSlop(three, '/tmp/hero.tsx', { hasContract: false });
+    expect(without.some((d) => d.ruleId === 'design-slop-bundle')).toBe(true);
+  });
+
   it('respects options.rules filter', () => {
     const diags = scanDesignSlop(SLOP_TSX, '/tmp/hero.tsx', { rules: ['no-ai-purple'] });
     expect(diags).toHaveLength(1);

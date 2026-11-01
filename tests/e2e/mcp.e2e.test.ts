@@ -9,7 +9,7 @@ const root = resolve(__dirname, '..', '..');
 const serverEntry = join(root, 'packages/mcp-server/dist/index.js');
 
 describe('mcp server e2e', () => {
-  it('advertises all eight tools', async () => {
+  it('advertises all nine tools', async () => {
     const transport = new StdioClientTransport({ command: process.execPath, args: [serverEntry] });
     const client = new Client({ name: 'e2e', version: '1.0.0' });
     await client.connect(transport);
@@ -18,6 +18,7 @@ describe('mcp server e2e', () => {
     expect(names).toEqual([
       'check_context_rot',
       'check_degradation',
+      'check_design_contract',
       'check_package',
       'check_prose',
       'check_slop',
@@ -152,6 +153,25 @@ describe('mcp server e2e', () => {
     expect(payload.current.erosion).toBeGreaterThan(0);
     expect(payload.delta.degrading).toBe(true);
     expect(payload.delta.reasons.join(' ')).toContain('erosion');
+    await client.close();
+  });
+
+  it('check_design_contract reports drift', async () => {
+    const transport = new StdioClientTransport({ command: process.execPath, args: [serverEntry] });
+    const client = new Client({ name: 'e2e', version: '1.0.0' });
+    await client.connect(transport);
+    const result = await client.callTool({
+      name: 'check_design_contract',
+      arguments: {
+        content: '---\nversion: alpha\ncolors:\n  indigo: "#6366f1"\n---\n# Design\n',
+        path: 'DESIGN.md',
+        files: [{ filePath: 'src/theme.css', code: '.a { color: #ff0000; }\n.b { color: #ff0000; }\n.c { color: #ff0000; }\n' }],
+      },
+    });
+    const payload = JSON.parse((result as any).content[0].text);
+    expect(payload.contract.colors.indigo).toBe('#6366f1');
+    expect(payload.diagnostics.length).toBeGreaterThan(0);
+    expect(payload.diagnostics[0].ruleId).toBe('design-contract-drift');
     await client.close();
   });
 

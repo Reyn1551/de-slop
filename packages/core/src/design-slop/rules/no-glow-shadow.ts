@@ -1,4 +1,5 @@
 import type { DesignSlopRuleFn } from '../types';
+import { isExemptColor } from '../../design-contract/exemptions';
 import { collectRegex, toColumn } from '../utils';
 
 // Colored glow shadows (shadow-{color}/{alpha} or a box-shadow with a hue).
@@ -11,9 +12,14 @@ const GLOW_DECLARATION =
   /box-shadow\s*:\s*[^;}]*(?:indigo|purple|violet|blue|pink|cyan|emerald|teal|fuchsia|rose|amber|lime|green|red|orange)[^;}]*/g;
 const FOCUS_RING = /focus-visible:ring|focus:ring/g;
 
-export const noGlowShadow: DesignSlopRuleFn = (code, _filePath, locator) => {
+export const noGlowShadow: DesignSlopRuleFn = (code, _filePath, locator, contract) => {
   const hits = [...collectRegex(code, GLOW_CLASS), ...collectRegex(code, GLOW_DECLARATION)]
     .filter((hit) => !FOCUS_RING.test(hit.match))
+    // A declared brand color used as a glow is a choice, not a default.
+    .filter((hit) => {
+      const hex = /#[0-9a-fA-F]{3,8}/.exec(hit.match)?.[0];
+      return hex === undefined || !isExemptColor(contract ?? null, hex);
+    })
     .sort((a, b) => a.index - b.index);
 
   if (hits.length < 2) return [];

@@ -1,4 +1,5 @@
 import type { DesignSlopRuleFn } from '../types';
+import { isExemptColor, isExemptFamily } from '../../design-contract/exemptions';
 import { countRegex, collectRegex, rawLocator, toColumn } from '../utils';
 
 // VibeCode Purple band: hue 230-300°, captures indigo-500 #6366f1, indigo-600 #4f46e5,
@@ -24,10 +25,15 @@ const GRADIENT =
 const TOKEN_STRIP =
   /(?::root\s*{[^}]*}|\.\w*-purple\s*{[^}]*}|\.\w*-indigo\s*{[^}]*}|\.\w*-violet\s*{[^}]*})/g;
 
-export const noAiPurple: DesignSlopRuleFn = (code, _filePath, locator) => {
+export const noAiPurple: DesignSlopRuleFn = (code, _filePath, locator, contract) => {
   const stripped = code.replace(TOKEN_STRIP, '');
-  const purpleHex = collectRegex(stripped, HEX_PURPLE).filter((m) => !EXEMPT_HEX.test(m.match));
-  const tailwindHits = collectRegex(stripped, TAILWIND_PURPLE);
+  const purpleHex = collectRegex(stripped, HEX_PURPLE).filter(
+    (m) => !EXEMPT_HEX.test(m.match) && !isExemptColor(contract ?? null, m.match),
+  );
+  const tailwindHits = collectRegex(stripped, TAILWIND_PURPLE).filter((m) => {
+    const family = /(?:indigo|purple|violet)/.exec(m.match)?.[0];
+    return family === undefined || !isExemptFamily(contract ?? null, family);
+  });
 
   const total = purpleHex.length + tailwindHits.length;
   if (total === 0) return [];

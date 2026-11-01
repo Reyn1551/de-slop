@@ -33,7 +33,10 @@ export type DesignSlopRuleId = keyof typeof DESIGN_SLOP_RULES;
 export const DESIGN_SLOP_RULE_IDS = Object.keys(DESIGN_SLOP_RULES) as DesignSlopRuleId[];
 
 // Krebs co-occurrence method: >=4 distinct design tells in one file => error.
+// A project without a DESIGN.md gets the stricter threshold: an undeclared
+// choice is likelier to be a default than a decision.
 const BUNDLE_THRESHOLD = 4;
+const BUNDLE_THRESHOLD_NO_CONTRACT = 3;
 const BUNDLE_RULE_ID = 'design-slop-bundle';
 
 // Static markers that supplement the main rules for bundle detection only —
@@ -71,20 +74,22 @@ export function scanDesignSlop(
     : DESIGN_SLOP_RULE_IDS;
 
   for (const ruleId of enabled) {
-    const findings = DESIGN_SLOP_RULES[ruleId](code, filePath, locator);
+    const findings = DESIGN_SLOP_RULES[ruleId](code, filePath, locator, options.contract ?? null);
     for (const finding of findings) {
       diagnostics.push({ ...finding, ruleId, filePath });
     }
   }
 
   const triggered = new Set(diagnostics.map((d) => d.ruleId));
-  if (triggered.size >= BUNDLE_THRESHOLD) {
+  const noContract = options.hasContract === false;
+  const threshold = noContract ? BUNDLE_THRESHOLD_NO_CONTRACT : BUNDLE_THRESHOLD;
+  if (triggered.size >= threshold) {
     const markerHits = BUNDLE_MARKERS.filter((m) => m.test(code)).length;
     const loc = toColumn(locator.getLineAndCharacterOfPosition(0));
     diagnostics.push({
       ruleId: BUNDLE_RULE_ID,
       severity: 'error',
-      message: `${triggered.size} AI design tells in this file${markerHits > 0 ? ` + ${markerHits} section-skeleton markers` : ''} — statistically likely AI-generated design (Krebs co-occurrence method, 22% of Show HN sites hit this); audit copy, color, and typography`,
+      message: `${triggered.size} AI design tells in this file${markerHits > 0 ? ` + ${markerHits} section-skeleton markers` : ''} — statistically likely AI-generated design (Krebs co-occurrence method, 22% of Show HN sites hit this); audit copy, color, and typography${noContract ? '. No DESIGN.md found, so the threshold is 3: declare your tokens to earn the benefit of the doubt' : ''}`,
       filePath,
       ...loc,
     });

@@ -34,6 +34,18 @@ export type { ScanContentOptions } from './scan';
 export * as contextRot from './context-rot';
 export { scanContextRot, collectRepoFacts, isAgentConfig, CONTEXT_ROT_RULES, CONTEXT_ROT_RULE_IDS } from './context-rot';
 export type { RepoFacts } from './context-rot';
+export * as designContract from './design-contract';
+export {
+  parseDesignContract,
+  findDesignContract,
+  getExemptions,
+  scanDrift,
+  designContractScan,
+  normalizeColor,
+  contrastRatio,
+  isContractParseError,
+} from './design-contract';
+export type { DesignContract, DriftFinding, ContractLookup } from './design-contract';
 export * as degradation from './degradation';
 export {
   analyzeFile,

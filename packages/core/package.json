@@ -18,7 +18,8 @@
     "./prose-slop": "./dist/prose-slop/index.js",
     "./ux-guard": "./dist/ux-guard/index.js",
     "./degradation": "./dist/degradation/index.js",
-    "./context-rot": "./dist/context-rot/index.js"
+    "./context-rot": "./dist/context-rot/index.js",
+    "./design-contract": "./dist/design-contract/index.js"
   },
   "files": [
     "dist"

@@ -6,6 +6,10 @@ import {
   scanContextRot,
   collectRepoFacts,
   isAgentConfig,
+  findDesignContract,
+  designContractScan,
+  parseDesignContract,
+  isContractParseError,
 } from '@de-slop/core';
 import { parseArgs } from '../args.js';
 import { loadConfig } from '../config.js';
@@ -29,10 +33,15 @@ Runs every detector that applies to a file:
 Output is one line per finding: filePath:line:col severity ruleId message.
 
 Options:
-  --rules <a,b,c>  Only run the given rule ids (default: .desloprc rules)
-  --lock           Also verify .test.* files against the test-lock store
-  --strict         Exit 1 on warnings too
-  --help           Show this help
+  --rules <a,b,c>     Only run the given rule ids (default: .desloprc rules)
+  --lock              Also verify .test.* files against the test-lock store
+  --strict            Exit 1 on warnings too
+  --design-md <path>  Use this DESIGN.md contract instead of searching upward
+  --help              Show this help
+
+When the project has a DESIGN.md, declared colors, fonts, and radii stop being
+flagged, and values used often enough to be deliberate but never declared are
+reported as drift.
 
 Exit code is 1 when any error-severity finding is reported.
 `;
@@ -41,6 +50,16 @@ function splitRules(value) {
   return typeof value === 'string'
     ? value.split(',').map((part) => part.trim()).filter(Boolean)
     : undefined;
+}
+
+function resolveContract(explicitPath) {
+  if (typeof explicitPath === 'string') {
+    const parsed = parseDesignContract(readFileSync(explicitPath, 'utf8'), explicitPath);
+    if (isContractParseError(parsed)) return { value: null, error: parsed };
+    return { value: parsed, error: null };
+  }
+  const lookup = findDesignContract(process.cwd());
+  return { value: lookup.contract, error: lookup.error };
 }
 
 function byPosition(a, b) {
@@ -66,6 +85,11 @@ export default async function check(argv) {
     return missing.length > 0 ? 1 : 0;
   }
 
+  const contract = resolveContract(options['design-md']);
+  if (contract.error !== null) {
+    console.error(`de-slop: ${contract.error.path}: ${contract.error.message}`);
+  }
+
   const diagnostics = [];
   const sources = [];
   for (const filePath of files) {
@@ -84,7 +108,16 @@ export default async function check(argv) {
       continue;
     }
     sources.push({ filePath, code });
-    diagnostics.push(...scanContent(code, filePath, rules ? { rules } : {}));
+    diagnostics.push(
+      ...scanContent(code, filePath, {
+        ...(rules ? { rules } : {}),
+        contract: contract.value,
+        hasContract: contract.value !== null,
+      }),
+    );
+    if (contract.value !== null) {
+      diagnostics.push(...designContractScan(code, filePath, { contract: contract.value }));
+    }
   }
 
   const agentConfigs = sources.filter((source) => isAgentConfig(source.filePath));

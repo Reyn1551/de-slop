@@ -112,6 +112,36 @@ function registerTools(server: McpServer): void {
   );
 
   server.tool(
+    'check_design_contract',
+    'Parse a DESIGN.md contract and check a file for drift: values used often enough to be deliberate (3+ occurrences by default) that the contract never declares',
+    {
+      content: z.string().describe('Design contract file content, including the --- frontmatter'),
+      path: z.string().describe('Contract path, e.g. DESIGN.md'),
+      files: z.array(z.object({ filePath: z.string(), code: z.string() })).describe('Files to check against the contract'),
+      minimumOccurrences: z.number().optional().describe('Occurrence threshold before an undeclared value counts as drift (default 3)'),
+    },
+    async ({ content, path, files, minimumOccurrences }) => {
+      const { parseDesignContract, isContractParseError, scanDrift } = await import('@de-slop/core/design-contract');
+      const parsed = parseDesignContract(content, path);
+      if (isContractParseError(parsed)) return textResult({ error: parsed.message, path });
+
+      const diagnostics = files.flatMap((file) =>
+        scanDrift(file.code, file.filePath, parsed, minimumOccurrences === undefined ? {} : { minimumOccurrences }),
+      );
+      return textResult({
+        contract: {
+          version: parsed.version,
+          colors: Object.fromEntries(parsed.colors),
+          typography: Object.fromEntries(parsed.typography),
+          rounded: Object.fromEntries(parsed.rounded),
+          omitted: parsed.omitted,
+        },
+        diagnostics,
+      });
+    },
+  );
+
+  server.tool(
     'check_context_rot',
     'Check an agent instruction file (AGENTS.md, CLAUDE.md, .cursorrules) against the repo: stale file paths, symbols, and npm scripts that no longer exist (context rot, arXiv:2606.09090)',
     {

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { resolve, join } from 'node:path';
-import { readFileSync, existsSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
 const root = resolve(__dirname, '..', '..');
@@ -189,6 +189,42 @@ describe('cli e2e', () => {
     const compared = runCli(['budget', '.', '--baseline', join(dir, 'baseline.json')], { cwd: dir });
     expect(compared.status).toBe(0);
     expect(compared.stdout).toContain('no degradation');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('check honours a DESIGN.md contract', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-contract-'));
+    writeFileSync(
+      join(dir, 'DESIGN.md'),
+      '---\nversion: alpha\ncolors:\n  indigo: "#6366f1"\ntypography:\n  sans:\n    fontFamily: "Inter, system-ui, sans-serif"\n---\n# Design\n',
+    );
+    mkdirSync(join(dir, 'src'), { recursive: true });
+    const file = join(dir, 'src', 'card.tsx');
+    writeFileSync(
+      file,
+      [
+        'export function Card() {',
+        '  return <div className="text-indigo-400">Indigo on a card.</div>;',
+        '}',
+        '',
+      ].join('\n'),
+    );
+
+    const { stdout } = runCli(['check', join(dir, 'src')], { cwd: dir });
+    expect(stdout).not.toContain('no-ai-purple');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('check reports drift against a contract', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-drift-'));
+    writeFileSync(join(dir, 'DESIGN.md'), '---\nversion: alpha\ncolors:\n  indigo: "#6366f1"\n---\n# Design\n');
+    mkdirSync(join(dir, 'src'), { recursive: true });
+    const file = join(dir, 'src', 'theme.css');
+    writeFileSync(file, '.a { color: #ff0000; }\n.b { color: #ff0000; }\n.c { color: #ff0000; }\n');
+
+    const { stdout, status } = runCli(['check', join(dir, 'src')], { cwd: dir });
+    expect(status).toBe(1);
+    expect(stdout).toContain('design-contract-drift');
     rmSync(dir, { recursive: true, force: true });
   });
 
