@@ -40,8 +40,8 @@ const PRE_COMMIT_HOOK = `#!/bin/sh
 set -e
 
 # block AI co-author trailers sneaking into commits (Cursor/Claude auto-tag)
-if git diff --cached --name-only | grep -q . && git diff --cached | grep -qi "co-authored-by:.*(cursor\|claude\|copilot)\\|co-authored-by:.*@cursor\\|co-authored-by:.*claude-code"; then
-  echo "de-slop: commit contains an AI co-author trailer — strip it or commit with --no-verify"
+if git diff --cached --name-only | grep -q . && git diff --cached | grep -qiE "co-authored-by:.*(cursor|claude|copilot)"; then
+  echo "de-slop: commit contains an AI co-author trailer. Strip it, or commit with --no-verify."
   exit 1
 fi
 

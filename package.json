@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint . --ext .js",
     "typecheck": "tsc --noEmit -p packages/core && tsc --noEmit -p packages/mcp-server",
     "test": "vitest run",
     "build": "tsc -p packages/core && tsc -p packages/mcp-server"

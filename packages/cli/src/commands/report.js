@@ -152,7 +152,7 @@ export default async function report(argv) {
   const target = positional[0] ?? '.';
   const outDir = options.out ?? '.de-slop/reports';
 
-  const { files, missing } = findSourceFiles([target]);
+  const { files } = findSourceFiles([target]);
   const diagnosticsByFile = [];
   for (const filePath of files) {
     const diagnostics = scanFile(filePath);
