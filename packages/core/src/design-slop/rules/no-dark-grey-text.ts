@@ -12,7 +12,7 @@ import { collectRegex, toColumn } from '../utils';
 // card, so the pairing is spatial now.
 
 const DARK_SURFACE_CLASS =
-  /\b(?:bg|from)-(?:slate|gray|neutral|zinc)-(?:900|950)\b|\bbg-black\b/g;
+  /\b(?:bg|from)-(?:slate|gray|neutral|zinc)-(?:900|950)\b|\bbg-black\b/;
 
 const DARK_HEX_DECL =
   /background(?:-color)?\s*:\s*(#[0-9a-fA-F]{3,8}|rgb\(\s*\d+\s*[, ]\s*\d+\s*[, ]\s*\d+\s*\))/gi;
@@ -68,7 +68,6 @@ function darkMarkupRegions(code: string): Region[] {
     const className = /\bclassName\s*=\s*(?:"([^"]*)"|'([^']*)'|\{`([^`]*)`\})/.exec(tag);
     const classes = className?.[1] ?? className?.[2] ?? className?.[3] ?? '';
     const dark = DARK_SURFACE_CLASS.test(classes);
-    DARK_SURFACE_CLASS.lastIndex = 0;
     open.push({ name, start: index, dark });
   }
 

@@ -9,13 +9,14 @@ const root = resolve(__dirname, '..', '..');
 const serverEntry = join(root, 'packages/mcp-server/dist/index.js');
 
 describe('mcp server e2e', () => {
-  it('advertises all six tools', async () => {
+  it('advertises all seven tools', async () => {
     const transport = new StdioClientTransport({ command: process.execPath, args: [serverEntry] });
     const client = new Client({ name: 'e2e', version: '1.0.0' });
     await client.connect(transport);
     const { tools } = await client.listTools();
     const names = tools.map((tool: any) => tool.name).sort();
     expect(names).toEqual([
+      'check_degradation',
       'check_package',
       'check_prose',
       'check_slop',
@@ -107,6 +108,49 @@ describe('mcp server e2e', () => {
     const ruleIds = payload.diagnostics.map((diagnostic: { ruleId: string }) => diagnostic.ruleId);
     expect(ruleIds).toContain('no-img-missing-alt');
     expect(ruleIds).toContain('no-icon-button-unlabeled');
+    await client.close();
+  });
+
+  it('check_degradation reports erosion and a regression', async () => {
+    const transport = new StdioClientTransport({ command: process.execPath, args: [serverEntry] });
+    const client = new Client({ name: 'e2e', version: '1.0.0' });
+    await client.connect(transport);
+
+    const clean = 'export function add(a: number, b: number): number { return a + b; }\n';
+    const eroded = [
+      'export function handle(input: string): number {',
+      '  let total = 0;',
+      '  if (input.length > 0) {',
+      '    for (const character of input) {',
+      '      if (character === "a") { total += 1; }',
+      '      else if (character === "b") { total += 2; }',
+      '      else if (character === "c") { total += 3; }',
+      '      else if (character === "d") { total += 4; }',
+      '      else if (character === "e") { total += 5; }',
+      '      else if (character === "f") { total += 6; }',
+      '      else if (character === "g") { total += 7; }',
+      '      else if (character === "h") { total += 8; }',
+      '      else if (character === "i") { total += 9; }',
+      '      else { total += character.length > 0 ? 1 : 0; }',
+      '      if (total > 100 && total % 2 === 0) { total = 0; }',
+      '    }',
+      '  }',
+      '  return total;',
+      '}',
+      '',
+    ].join('\n');
+
+    const result = await client.callTool({
+      name: 'check_degradation',
+      arguments: {
+        files: [{ filePath: 'handle.ts', code: eroded }],
+        baseline: [{ filePath: 'handle.ts', code: clean }],
+      },
+    });
+    const payload = JSON.parse((result as any).content[0].text);
+    expect(payload.current.erosion).toBeGreaterThan(0);
+    expect(payload.delta.degrading).toBe(true);
+    expect(payload.delta.reasons.join(' ')).toContain('erosion');
     await client.close();
   });
 });

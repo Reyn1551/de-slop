@@ -12,16 +12,20 @@ function textResult(data: unknown) {
 function registerTools(server: McpServer): void {
   server.tool(
     'check_slop',
-    'Scan code for AI slop patterns (redundant comments, dead code, unused vars, security issues) and runtime risks',
-    { paths: z.string().optional().describe('Comma-separated paths to scan'), code: z.string().optional().describe('Raw source code to scan') },
-    async ({ paths, code }) => {
-      const { scanSource } = await import('@de-slop/core/slop-scanner');
-      const { guardSource } = await import('@de-slop/core/runtime-guard');
+    'Run every de-slop detector over code, markup, or docs: AST slop rules, runtime guards, agent guards, design tells, accessibility, and prose',
+    {
+      paths: z.string().optional().describe('Comma-separated paths to scan'),
+      code: z.string().optional().describe('Raw source code to scan'),
+      filename: z.string().optional().describe('Filename for raw code (default stdin.ts); the extension picks the detectors'),
+      rules: z.array(z.string()).optional().describe('Only run these rule ids'),
+    },
+    async ({ paths, code, filename, rules }) => {
+      const { scanContent } = await import('@de-slop/core');
+      const options = rules ? { rules } : {};
       const diagnostics: unknown[] = [];
 
       if (code) {
-        diagnostics.push(...scanSource(code, 'stdin.ts'));
-        diagnostics.push(...guardSource(code, 'stdin.ts'));
+        diagnostics.push(...scanContent(code, filename ?? 'stdin.ts', options));
       } else if (paths) {
         for (const rawPath of paths.split(',').map((p) => p.trim()).filter(Boolean)) {
           let source: string;
@@ -31,8 +35,7 @@ function registerTools(server: McpServer): void {
             diagnostics.push({ ruleId: 'scan-error', severity: 'error', message: `cannot read file: ${rawPath}`, filePath: rawPath, line: 0, column: 0 });
             continue;
           }
-          diagnostics.push(...scanSource(source, rawPath));
-          diagnostics.push(...guardSource(source, rawPath));
+          diagnostics.push(...scanContent(source, rawPath, options));
         }
       }
       return textResult({ diagnostics });
@@ -105,6 +108,23 @@ function registerTools(server: McpServer): void {
       const { scanUx } = await import('@de-slop/core/ux-guard');
       const source = text ?? (path ? await readFile(path, 'utf8') : '');
       return textResult({ diagnostics: scanUx(source, path ?? 'stdin.tsx', rules ? { rules } : {}) });
+    },
+  );
+
+  server.tool(
+    'check_degradation',
+    'Measure code degradation: structural erosion (complexity mass in functions above cyclomatic 10) and verbosity (flagged plus duplicate lines), against the SlopCodeBench human baselines of 0.34 and 0.19',
+    {
+      files: z.array(z.object({ filePath: z.string(), code: z.string() })).describe('Files to analyze'),
+      baseline: z.array(z.object({ filePath: z.string(), code: z.string() })).optional().describe('Earlier versions to compare against'),
+    },
+    async ({ files, baseline }) => {
+      const { analyzeProject, compareBaseline } = await import('@de-slop/core/degradation');
+      const current = analyzeProject(files);
+      if (!baseline) return textResult({ current });
+
+      const previous = analyzeProject(baseline);
+      return textResult({ current, baseline: previous, delta: compareBaseline(current, previous) });
     },
   );
 }

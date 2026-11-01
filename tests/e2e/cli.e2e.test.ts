@@ -155,4 +155,57 @@ describe('cli e2e', () => {
     expect(stdout).toContain('no-secret-logging');
     rmSync(dir, { recursive: true, force: true });
   });
+
+  it('check flags prose tells in a markdown file', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-prose-'));
+    const file = join(dir, 'guide.md');
+    writeFileSync(file, "Great question! Let's dive in.\n\nThat's the real win.\n");
+    const { stdout, status } = runCli(['check', file]);
+    expect(status).toBe(1);
+    expect(stdout).toContain('no-chatbot-residue');
+    expect(stdout).toContain('no-closer-line');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('check flags accessibility failures in JSX', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-ux-'));
+    const file = join(dir, 'Header.tsx');
+    writeFileSync(file, 'export function Header() {\n  return <img src="/logo.png" />;\n}\n');
+    const { stdout, status } = runCli(['check', file]);
+    expect(status).toBe(1);
+    expect(stdout).toContain('no-img-missing-alt');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('budget saves a baseline and reports a clean run', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-budget-'));
+    writeFileSync(join(dir, 'small.ts'), 'export function add(a: number, b: number): number { return a + b; }\n');
+    const saved = runCli(['budget', '.', '--save', '--baseline', join(dir, 'baseline.json')], { cwd: dir });
+    expect(saved.status).toBe(0);
+    expect(saved.stdout).toContain('erosion');
+    expect(existsSync(join(dir, 'baseline.json'))).toBe(true);
+
+    const compared = runCli(['budget', '.', '--baseline', join(dir, 'baseline.json')], { cwd: dir });
+    expect(compared.status).toBe(0);
+    expect(compared.stdout).toContain('no degradation');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('budget fails when erosion grows past the baseline', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-budget2-'));
+    const baseline = join(dir, 'baseline.json');
+    writeFileSync(join(dir, 'work.ts'), 'export function add(a: number, b: number): number { return a + b; }\n');
+    runCli(['budget', '.', '--save', '--baseline', baseline], { cwd: dir });
+
+    const branches = Array.from({ length: 12 }, (_, index) => `  if (value === ${index}) { return ${index}; }`);
+    writeFileSync(
+      join(dir, 'work.ts'),
+      ['export function pick(value: number): number {', ...branches, '  return -1;', '}', ''].join('\n'),
+    );
+
+    const { stdout, status } = runCli(['budget', '.', '--baseline', baseline], { cwd: dir });
+    expect(status).toBe(1);
+    expect(stdout).toContain('degraded');
+    rmSync(dir, { recursive: true, force: true });
+  });
 });

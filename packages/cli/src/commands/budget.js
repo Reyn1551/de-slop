@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import {
   analyzeProject,
   compareBaseline,
@@ -9,6 +8,7 @@ import {
   HUMAN_VERBOSITY_BASELINE,
 } from '@de-slop/core';
 import { parseArgs } from '../args.js';
+import { loadConfig } from '../config.js';
 import { findSourceFiles } from '../files.js';
 
 export const help = `de-slop budget — measure code degradation against a baseline
@@ -36,7 +36,6 @@ Options:
 Exit code is 1 when the current run degraded past the baseline or ceiling.
 `;
 
-const BASELINE_PATH = join('.de-slop', 'baseline.json');
 const CODE_FILE = /\.(?:ts|tsx|mts|cts|js|jsx|mjs|cjs)$/;
 
 function readSources(files) {
@@ -54,9 +53,10 @@ function readSources(files) {
 
 export default async function budget(argv) {
   const { positional, options } = parseArgs(argv);
+  const config = loadConfig(process.cwd());
   const paths = positional.length > 0 ? positional : ['.'];
-  const baselinePath = options.baseline ?? BASELINE_PATH;
-  const tolerance = Number(options.tolerance ?? 0.02);
+  const baselinePath = options.baseline ?? config.budget.baseline;
+  const tolerance = Number(options.tolerance ?? config.budget.tolerance);
 
   const { files } = findSourceFiles(paths);
   const sources = readSources(files);
@@ -76,7 +76,7 @@ export default async function budget(argv) {
   const delta = baseline ? compareBaseline(current, baseline, tolerance) : null;
 
   const overCeiling =
-    options.ceiling === true &&
+    (options.ceiling === true || (options.ceiling === undefined && config.budget.ceiling)) &&
     (current.erosion > HUMAN_EROSION_BASELINE || current.verbosity > HUMAN_VERBOSITY_BASELINE);
 
   if (options.json) {

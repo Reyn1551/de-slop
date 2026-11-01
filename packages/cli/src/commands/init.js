@@ -23,10 +23,16 @@ Existing files are never overwritten.
 
 const CONFIG_FILE = '.desloprc.json';
 const DEFAULT_CONFIG = {
-  strict: true,
-  maxRetries: 5,
-  maxDiffLines: 500,
   exclude: ['node_modules', 'dist'],
+  rules: [],
+  prose: [],
+  ux: [],
+  strict: false,
+  budget: {
+    tolerance: 0.02,
+    ceiling: false,
+    baseline: '.de-slop/baseline.json',
+  },
 };
 
 const PRE_COMMIT_HOOK = `#!/bin/sh

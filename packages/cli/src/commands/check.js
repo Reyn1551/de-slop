@@ -1,23 +1,34 @@
+import { readFileSync } from 'node:fs';
 import { verifyTestFile, checkPackageManifest } from '@de-slop/core';
 import { parseArgs } from '../args.js';
+import { loadConfig } from '../config.js';
 import { findSourceFiles } from '../files.js';
 import { scanFile } from '../scan.js';
-import { readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
 
-export const help = `de-slop check — scan source files for AI slop patterns
+export const help = `de-slop check — scan code, markup, and docs for AI slop
 
 Usage: de-slop check [paths...] [options]
 
-Scans each file with the slop-scanner and the runtime-guard, then reports
-every diagnostic as: filePath:line:col severity ruleId message
+Runs every detector that applies to a file:
+
+  slop-scanner   AST rules for code slop and security defects
+  runtime-guard  unhandled promises, missing cleanup, null access
+  agent-guard    prompt injection, invisible unicode, unsafe install docs
+  design-slop    AI design tells (palette, gradients, glass, fonts)
+  ux-guard       provable accessibility and interaction failures (JSX/HTML/CSS)
+  prose-slop     AI writing tells (Markdown and text)
+  test-lock      test files against .de-slop/test-lock.json (with --lock)
+  package-gate   install scripts in package.json
+
+Output is one line per finding: filePath:line:col severity ruleId message.
 
 Options:
-  --rules <a,b,c>  Only run the given rule ids
-  --lock           Also verify .test.* files against .de-slop/test-lock.json
+  --rules <a,b,c>  Only run the given rule ids (default: .desloprc rules)
+  --lock           Also verify .test.* files against the test-lock store
+  --strict         Exit 1 on warnings too
   --help           Show this help
 
-Exit code is 1 when any error-severity diagnostic is found, 0 otherwise.
+Exit code is 1 when any error-severity finding is reported.
 `;
 
 function splitRules(value) {
@@ -34,8 +45,10 @@ function byPosition(a, b) {
 
 export default async function check(argv) {
   const { positional, options } = parseArgs(argv);
+  const config = loadConfig(process.cwd());
   const paths = positional.length > 0 ? positional : ['.'];
-  const rules = splitRules(options.rules);
+  const rules = splitRules(options.rules) ?? (config.rules.length > 0 ? config.rules : undefined);
+  const strict = options.strict === true || config.strict;
 
   const { files, missing } = findSourceFiles(paths);
   if (files.length === 0) {
@@ -52,8 +65,7 @@ export default async function check(argv) {
     diagnostics.push(...scanFile(filePath, rules));
   }
 
-  const checkTestLock = options.lock && (rules === undefined || rules.includes('test-lock'));
-  if (checkTestLock) {
+  if (options.lock && (rules === undefined || rules.includes('test-lock'))) {
     for (const filePath of files) {
       if (!/\.test\./.test(filePath)) continue;
       for (const violation of verifyTestFile(filePath)) {
@@ -96,9 +108,9 @@ export default async function check(argv) {
     if (diagnostic.severity === 'error') errors += 1;
     else if (diagnostic.severity === 'warning') warnings += 1;
     console.log(
-      `${diagnostic.filePath}:${diagnostic.line}:${diagnostic.column} ${diagnostic.severity} ${diagnostic.ruleId} ${diagnostic.message}`
+      `${diagnostic.filePath}:${diagnostic.line}:${diagnostic.column} ${diagnostic.severity} ${diagnostic.ruleId} ${diagnostic.message}`,
     );
   }
   console.log(`${diagnostics.length} problems found (${errors} errors, ${warnings} warnings)`);
-  return errors > 0 ? 1 : 0;
+  return errors > 0 || (strict && warnings > 0) ? 1 : 0;
 }

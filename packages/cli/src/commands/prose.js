@@ -1,22 +1,23 @@
 import { readFileSync } from 'node:fs';
 import { analyzeProse } from '@de-slop/core';
 import { parseArgs } from '../args.js';
+import { loadConfig } from '../config.js';
 import { findSourceFiles } from '../files.js';
 
 export const help = `de-slop prose — score documents for AI writing tells
 
 Usage: de-slop prose [paths...] [options]
 
-Scans Markdown/text documents for the writing patterns that mark machine
-copy: not-X-but-Y contrasts, staged openers, chatbot residue, inflated
+Scans Markdown and text documents for the patterns that mark machine copy:
+not-X-but-Y contrasts, staged openers, chatbot residue, inflated
 significance, AI vocabulary, dash overload, bold-label lists, and closers.
 
-Prints one line per document with its score, then every finding.
+Each document gets a 0-100 score. A score of 25 or more is an error.
 
 Options:
-  --rules <a,b,c>  Only run the given rule ids
+  --rules <a,b,c>  Only run the given rule ids (default: .desloprc prose)
   --min <score>    Only report documents at or above this score (default 0)
-  --json           Print machine-readable JSON instead of text
+  --json           Print machine-readable JSON
   --help           Show this help
 
 Exit code is 1 when any error-severity finding is reported.
@@ -30,8 +31,9 @@ function splitRules(value) {
 
 export default async function prose(argv) {
   const { positional, options } = parseArgs(argv);
+  const config = loadConfig(process.cwd());
   const paths = positional.length > 0 ? positional : ['.'];
-  const rules = splitRules(options.rules);
+  const rules = splitRules(options.rules) ?? (config.prose.length > 0 ? config.prose : undefined);
   const minimum = Number(options.min ?? 0);
 
   const { files, missing } = findSourceFiles(paths);

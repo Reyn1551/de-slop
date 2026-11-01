@@ -29,6 +29,8 @@ export { scanProse, analyzeProse, isProseFile } from './prose-slop';
 export type { ProseScanResult, ProseMetrics } from './prose-slop';
 export * as uxGuard from './ux-guard';
 export { scanUx, UX_RULES, UX_RULE_IDS } from './ux-guard';
+export { scanContent } from './scan';
+export type { ScanContentOptions } from './scan';
 export * as degradation from './degradation';
 export {
   analyzeFile,

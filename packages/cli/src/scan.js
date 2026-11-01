@@ -1,18 +1,11 @@
 import { readFileSync } from 'node:fs';
-import { extname } from 'node:path';
-import { agentGuardScan, designSlopScan, guardSource, scanProse, scanSource, scanUx } from '@de-slop/core';
-
-const CODE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.json']);
-const DOC_EXTENSIONS = new Set(['.md', '.mdx', '.txt', '.rst', '.adoc']);
-const MARKUP_EXTENSIONS = new Set(['.tsx', '.jsx', '.html', '.htm', '.vue', '.svelte', '.astro', '.css']);
+import { scanContent } from '@de-slop/core';
 
 /**
- * Run the slop-scanner, the runtime-guard and the agent-guard over one file
- * and merge their diagnostics. Parse/read failures become a single error
- * diagnostic so one broken file does not abort the whole run.
+ * Read one file and hand it to the core detector fan-out. A read failure
+ * becomes a single `scan-error` diagnostic so the run continues.
  */
 export function scanFile(filePath, rules) {
-  const options = rules ? { rules } : {};
   let code;
   try {
     code = readFileSync(filePath, 'utf8');
@@ -26,87 +19,5 @@ export function scanFile(filePath, rules) {
       column: 0,
     }];
   }
-
-  const ext = extname(filePath);
-  const isCode = CODE_EXTENSIONS.has(ext);
-  const isDoc = DOC_EXTENSIONS.has(ext);
-
-  const diagnostics = [];
-  if (isCode) {
-    for (const run of [
-      () => scanSource(code, filePath, options),
-      () => guardSource(code, filePath, options),
-    ]) {
-      try {
-        diagnostics.push(...run());
-      } catch (err) {
-        diagnostics.push({
-          ruleId: 'scan-error',
-          severity: 'error',
-          message: `failed to parse: ${err.message}`,
-          filePath,
-          line: 0,
-          column: 0,
-        });
-      }
-    }
-  }
-
-  try {
-    diagnostics.push(...agentGuardScan(code, filePath, options));
-  } catch (err) {
-    diagnostics.push({
-      ruleId: 'scan-error',
-      severity: 'error',
-      message: `failed to scan: ${err.message}`,
-      filePath,
-      line: 0,
-      column: 0,
-    });
-  }
-
-  try {
-    diagnostics.push(...designSlopScan(code, filePath, options));
-  } catch (err) {
-    diagnostics.push({
-      ruleId: 'scan-error',
-      severity: 'error',
-      message: `failed to scan design: ${err.message}`,
-      filePath,
-      line: 0,
-      column: 0,
-    });
-  }
-
-  if (isDoc) {
-    try {
-      diagnostics.push(...scanProse(code, filePath, options));
-    } catch (err) {
-      diagnostics.push({
-        ruleId: 'scan-error',
-        severity: 'error',
-        message: `failed to scan prose: ${err.message}`,
-        filePath,
-        line: 0,
-        column: 0,
-      });
-    }
-  }
-
-  if (MARKUP_EXTENSIONS.has(ext)) {
-    try {
-      diagnostics.push(...scanUx(code, filePath, options));
-    } catch (err) {
-      diagnostics.push({
-        ruleId: 'scan-error',
-        severity: 'error',
-        message: `failed to scan ux: ${err.message}`,
-        filePath,
-        line: 0,
-        column: 0,
-      });
-    }
-  }
-
-  return diagnostics;
+  return scanContent(code, filePath, rules ? { rules } : {});
 }
