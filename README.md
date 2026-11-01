@@ -84,8 +84,8 @@ directory name or a repo-relative path.
 ```
 
 Tools: `check_slop`, `check_prose`, `check_ux`, `check_degradation`,
-`check_context_rot`, `verify_tests`, `check_package`, `spec_verify`.
-`check_slop` runs every detector and picks them by file extension.
+`check_context_rot`, `check_design_contract`, `verify_tests`, `check_package`,
+`spec_verify`. `check_slop` runs every detector and picks them by file extension.
 
 ## GitHub Action
 

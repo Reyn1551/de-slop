@@ -39,9 +39,17 @@ function isPureForwarder(node: WrapperCandidate): boolean {
     call = body;
   }
   if (call.arguments.length !== parameters.length) return false;
-  return call.arguments.every(
+  const forwarded = call.arguments.every(
     (argument, index) => ast.isIdentifier(argument) && argument.text === paramName(parameters[index]),
   );
+  if (!forwarded) return false;
+
+  // Only a bare identifier callee counts. `return regex.test(input)` and
+  // `return list.includes(item)` pass the argument straight through but derive
+  // a value from it, and the rule reported every named predicate that way.
+  // Namespace forwarding (`utils.handle(x)`) now goes unreported; a missed
+  // warning beats a wrong one.
+  return ast.isIdentifier(call.expression);
 }
 
 function collectCandidates(sourceFile: SourceFile): WrapperCandidate[] {

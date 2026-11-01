@@ -16,7 +16,6 @@ jobs:
       - run: npm ci
       - run: npx de-slop check . --lock
       - run: npx de-slop context .
-      - run: npx de-slop budget . --ceiling
 `;
 
 export const MCP_CONFIG_CURSOR = `{

@@ -120,6 +120,16 @@ describe('no-over-wrapper', () => {
     const code = 'const factor = 2;\nfunction scaled(a: number) {\n  return multiply(a, factor);\n}\nscaled(1);\n';
     expect(ids(code)).not.toContain('no-over-wrapper');
   });
+
+  it('ignores a predicate that derives a value from its argument', () => {
+    const code = 'function isCssFile(path: string) {\n  return CSS_FILE.test(path);\n}\nisCssFile("a.css");\n';
+    expect(ids(code)).not.toContain('no-over-wrapper');
+  });
+
+  it('ignores a namespace forwarder', () => {
+    const code = 'function handle(input: string) {\n  return utils.handle(input);\n}\nhandle("x");\n';
+    expect(ids(code)).not.toContain('no-over-wrapper');
+  });
 });
 
 describe('no-unused-var', () => {

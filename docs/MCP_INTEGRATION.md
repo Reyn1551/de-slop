@@ -32,6 +32,7 @@ npx de-slop mcp
 | `check_ux` | `text` or `path`, optional `rules` | Accessibility diagnostics |
 | `check_degradation` | `files`, optional `baseline` | Erosion, verbosity, and a delta against the baseline |
 | `check_context_rot` | `content`, `path`, `files`, optional `packageJson` | Stale paths, symbols, and scripts in an instruction file |
+| `check_design_contract` | `content`, `path`, `files`, optional `minimumOccurrences` | Parsed contract plus drift diagnostics for values it never declares |
 | `verify_tests` | `path`, optional `storePath` | Violations against the locked fingerprint |
 | `check_package` | `name`, `ecosystem` | Verdict: `ok`, `suspicious`, `not-found`, `unknown`, `typosquat` |
 | `spec_verify` | `specPath`, `sourceGlobs` | Spec violations |

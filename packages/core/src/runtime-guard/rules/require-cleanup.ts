@@ -32,8 +32,11 @@ function collectOpensCloses(body: Node): { opens: Open[]; closes: string[] } {
         const event = argString(node.arguments[1]);
         closes.push(`listener:${target}:${event}`);
       } else if (calleeName.includes('setInterval')) {
+        // No handle means nothing here could ever clear it. `no-uncleaned-timer`
+        // owns that case, so this rule stays silent instead of reporting the
+        // same call twice.
         const id = findAssignedId(node);
-        opens.push({ kind: 'interval', key: `interval:${id}`, node });
+        if (id) opens.push({ kind: 'interval', key: `interval:${id}`, node });
       } else if (calleeName.includes('clearInterval') && node.arguments[0] && ast.isIdentifier(node.arguments[0])) {
         closes.push(`interval:${(node.arguments[0] as any).text}`);
       } else if (calleeName.includes('setTimeout')) {
@@ -109,20 +112,26 @@ function scanScope(sourceFile: SourceFile, scopeNode: Node): Omit<Diagnostic, 'f
 export const requireCleanup: Rule = {
   id: 'require-cleanup',
   check(sourceFile) {
-    const findings: Omit<Diagnostic, 'filePath' | 'ruleId'>[] = [];
-    findings.push(...scanScope(sourceFile, sourceFile));
+    // A nested scope is also reached through the file scope, so the same open
+    // call was reported twice. Deduplicate by position: one call, one finding.
+    const byPosition = new Map<string, Omit<Diagnostic, 'filePath' | 'ruleId'>>();
+    const record = (findings: Omit<Diagnostic, 'filePath' | 'ruleId'>[]): void => {
+      for (const finding of findings) byPosition.set(`${finding.line}:${finding.column}`, finding);
+    };
+
+    record(scanScope(sourceFile, sourceFile));
 
     function visit(node: Node): void {
       if (isFunctionNode(node)) {
         const body = (node as any).body as Node | undefined;
         if (body && (ast.isBlock(body) || ast.isExpression(body))) {
-          findings.push(...scanScope(sourceFile, body));
+          record(scanScope(sourceFile, body));
         }
       }
       node.forEachChild(visit);
     }
 
     visit(sourceFile);
-    return findings;
+    return [...byPosition.values()].sort((a, b) => a.line - b.line || a.column - b.column);
   },
 };
