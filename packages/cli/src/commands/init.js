@@ -1,6 +1,12 @@
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { GITHUB_ACTION_WORKFLOW, MCP_CONFIG_CURSOR, MCP_CONFIG_CLAUDE, AGENTS_DESLOP_RULES } from '../templates.js';
+import {
+  GITHUB_ACTION_WORKFLOW,
+  MCP_CONFIG_CURSOR,
+  MCP_CONFIG_CLAUDE,
+  AGENTS_DESLOP_RULES,
+  DESIGN_CONTRACT_TEMPLATE,
+} from '../templates.js';
 import { parseArgs } from '../args.js';
 
 export const help = `de-slop init — scaffold de-slop in the current project
@@ -16,6 +22,7 @@ Creates:
 Options:
   --ci                  also write .github/workflows/de-slop.yml (GitHub Actions)
   --mcp <target>        also write MCP server config for 'cursor' or 'claude'
+  --design              also write a DESIGN.md contract template
   --help                Show this help
 
 Existing files are never overwritten.
@@ -107,6 +114,15 @@ export default async function init(argv) {
       created.push(mcpPath);
     } else {
       console.log(`de-slop: ${mcpPath} already exists, leaving it untouched`);
+    }
+  }
+
+  if (options.design) {
+    if (!existsSync('DESIGN.md')) {
+      writeFileSync('DESIGN.md', DESIGN_CONTRACT_TEMPLATE, 'utf8');
+      created.push('DESIGN.md');
+    } else {
+      console.log('de-slop: DESIGN.md already exists, leaving it untouched');
     }
   }
 

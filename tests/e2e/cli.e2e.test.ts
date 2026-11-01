@@ -192,6 +192,17 @@ describe('cli e2e', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
+  it('init --design writes a parseable contract', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'deslop-design-'));
+    writeFileSync(join(dir, 'package.json'), '{"name":"t","version":"0.0.0"}');
+    const { status } = runCli(['init', '--design'], { cwd: dir });
+    expect(status).toBe(0);
+    const contract = readFileSync(join(dir, 'DESIGN.md'), 'utf8');
+    expect(contract.startsWith('---\n')).toBe(true);
+    expect(contract).toContain('colors:');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
   it('check honours a DESIGN.md contract', () => {
     const dir = mkdtempSync(join(tmpdir(), 'deslop-contract-'));
     writeFileSync(

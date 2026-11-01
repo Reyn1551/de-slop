@@ -8,6 +8,7 @@ Run it before you trust a green build.
 
 ```bash
 npx de-slop init          # config, test-lock store, pre-commit hook
+npx de-slop init --design # plus a DESIGN.md contract template
 npx de-slop check .       # every detector, exit 1 on error
 npx de-slop fix .         # rewrite the fixable findings
 npx de-slop prose docs/   # score documentation for AI writing tells
@@ -85,7 +86,8 @@ directory name or a repo-relative path.
 
 Nine tools: `check_slop`, `check_prose`, `check_ux`, `check_degradation`,
 `check_context_rot`, `check_design_contract`, `verify_tests`, `check_package`,
-`spec_verify`. `check_slop` runs every detector and picks them by file extension.
+`spec_verify`. `check_slop` runs every detector and picks them by extension;
+the rest target one concern each.
 
 ## GitHub Action
 
@@ -103,7 +105,7 @@ writes the client config.
 
 ```bash
 npm run build       # tsc core + mcp-server into dist
-npm test            # vitest, 437 tests
+npm test            # vitest, 440 tests
 npm run typecheck   # tsc --noEmit
 ```
 

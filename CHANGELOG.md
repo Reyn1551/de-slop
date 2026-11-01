@@ -22,7 +22,8 @@
   of 100 npm and 60 PyPI names, plus separator and scope tricks.
 - `scanContent` in core: one detector fan-out by file extension, shared by the
   CLI, the MCP server, and the action.
-- CLI commands `prose`, `budget`, `context`.
+- CLI commands `prose`, `budget`, `context`; `init --design` writes a
+  contract template; `check --design-md <path>` overrides the lookup.
 - MCP tools `check_prose`, `check_ux`, `check_degradation`, `check_context_rot`
   (8 tools total).
 - `.desloprc.json` fields `rules`, `prose`, `ux`, `strict`, `budget`; the CLI

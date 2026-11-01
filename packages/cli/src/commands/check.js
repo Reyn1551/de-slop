@@ -27,6 +27,7 @@ Runs every detector that applies to a file:
   design-slop    AI design tells (palette, gradients, glass, fonts)
   ux-guard       provable accessibility and interaction failures (JSX/HTML/CSS)
   prose-slop     AI writing tells (Markdown and text)
+  context-rot    agent instruction files against the repo
   test-lock      test files against .de-slop/test-lock.json (with --lock)
   package-gate   install scripts in package.json
 
