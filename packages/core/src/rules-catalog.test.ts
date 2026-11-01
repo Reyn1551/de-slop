@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { rules } from './slop-scanner/rules';
 import { agentGuardRules } from './agent-guard';
@@ -26,6 +28,9 @@ const REGISTERED: Record<string, string[]> = {
   'design-contract': ['design-contract-drift'],
   'cross-cutting': ['scan-error', 'test-lock', 'package-gate'],
 };
+
+/** Ids emitted by the harness, not by a pattern. The README counts patterns. */
+const SYNTHETIC_IDS = new Set(['design-slop-bundle', 'prose-slop-bundle', 'mcp-config-unparseable', 'commit-empty-message']);
 
 const catalogIds = RULES_CATALOG.map((rule) => rule.id);
 
@@ -86,5 +91,26 @@ describe('rules catalog', () => {
 
   it('documents 94 rules', () => {
     expect(RULES_CATALOG).toHaveLength(94);
+  });
+
+  it('counts every module the same way the README does', () => {
+    // The README table claims a detector count per module. Nothing else checks
+    // it, and it went stale twice during development. The README counts the
+    // patterns a module offers; the synthetic aggregate ids (a bundle error, an
+    // unparseable-config warning, an empty-message error) are not patterns.
+    const readme = readFileSync(join(__dirname, '..', '..', '..', 'README.md'), 'utf8');
+    const claimed: Record<string, number> = {};
+    for (const line of readme.split('\n')) {
+      const row = /^\| `([\w-]+)` \|.*\| ([\w +]+) \|$/.exec(line);
+      if (row === null) continue;
+      const count = Number(row[2].trim());
+      if (!Number.isNaN(count)) claimed[row[1]] = count;
+    }
+
+    for (const [module, ids] of Object.entries(REGISTERED)) {
+      if (!(module in claimed)) continue;
+      const patterns = ids.filter((id) => !SYNTHETIC_IDS.has(id));
+      expect(claimed[module], `${module} count in README`).toBe(patterns.length);
+    }
   });
 });

@@ -33,7 +33,7 @@ npx de-slop mcp           # stdio MCP server
 | `prose-slop` | AI writing tells: not-X-but-Y contrasts, staged openers, chatbot residue, inflated significance, fake depth, sales language, AI vocabulary, dash overload, bold-label lists, closers | 14 |
 | `context-rot` | Agent instructions pointing at files, symbols, or scripts that no longer exist, plus instruction quality: line budget, generic advice, pasted trees, duplicates | 8 |
 | `mcp-guard` | MCP client configs: plaintext transport, literal secrets, unpinned launches, typosquatted packages, dangerous auto-approval | 5 |
-| `commit-guard` | Commit and PR messages that contradict their diff: a named file or symbol the change never touched, a test claim with no test, a subject naming nothing | 9 |
+| `commit-guard` | Commit and PR messages that contradict their diff: a named file or symbol the change never touched, a test claim with no test, a subject naming nothing | 8 |
 | `test-lock` | Test files rewritten to pass: removed tests, skipped cases, weakened assertions, happy-path-only coverage | fingerprint |
 | `package-gate` | Slopsquatting: missing packages, brand-new packages, typosquats within one edit of a popular name, install scripts that pipe to a shell | registry + corpus |
 | `spec-contractor` | Spec drift: declared functions missing, invariants violated | contract |
