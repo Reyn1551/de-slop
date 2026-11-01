@@ -7,15 +7,32 @@ import { collectRegex, toColumn } from '../utils';
 // Target comfortable: off-white #E2E8F0 (12-15:1).
 
 const DARK_BG =
-  /(?:bg-(?:slate|gray|neutral|zinc)-(?:950|900)|bg-black\b|#0(?:0[0-9a-fA-F]{3}|30|506|a0a0a0)|rgb\([0-9]+\s*[,\s]+[0-9]+\s*[,\s]+[0-9]+\)\s*[:;])/g;
+  /(?:bg-(?:slate|gray|neutral|zinc)-(?:950|900)|bg-black\b|#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})|rgb\([0-9]+\s*[,\s]+[0-9]+\s*[,\s]+[0-9]+\)\s*[:;])/g;
 
 const GREY_TEXT =
   /\b(?:text|text-\[\w+\])-(?:gray|slate|neutral|zinc)-(?:400|500|600|700|800|900)\b/g;
 
 const OFF_WHITE = /text-(?:slate|gray|neutral|zinc)-(?:50|100|200|300)/g;
 
+// Relative luminance (WCAG): 0 = black, 1 = white. A background is "dark"
+// only when luminance is very low (< 0.15). This prevents false positives
+// like bright hues (#00a572 green) from triggering the rule.
+function hexLuminance(hex: string): number {
+  let h = hex.slice(1);
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  const lin = (c: number): number => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+
 export const noDarkGreyText: DesignSlopRuleFn = (code, _filePath, locator) => {
-  const darkBg = collectRegex(code, DARK_BG);
+  const darkBg = collectRegex(code, DARK_BG).filter((hit) => {
+    const m = hit.match;
+    if (m.startsWith('bg-') || m.startsWith('rgb')) return true;
+    return hexLuminance(m) < 0.15;
+  });
   if (darkBg.length === 0) return [];
 
   const findings: Omit<Diagnostic, 'filePath' | 'ruleId'>[] = [];
