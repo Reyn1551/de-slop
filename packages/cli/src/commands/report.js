@@ -1,6 +1,12 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { analyzeProject, checkPackages, HUMAN_EROSION_BASELINE, HUMAN_VERBOSITY_BASELINE } from '@de-slop/core';
+import {
+  analyzeProject,
+  checkPackages,
+  findDesignContract,
+  HUMAN_EROSION_BASELINE,
+  HUMAN_VERBOSITY_BASELINE,
+} from '@de-slop/core';
 import { verifyTestFile } from '@de-slop/core/test-lock';
 import { parseArgs } from '../args.js';
 import { findSourceFiles } from '../files.js';
@@ -171,9 +177,10 @@ export default async function report(argv) {
   const outDir = options.out ?? '.de-slop/reports';
 
   const { files } = findSourceFiles([target]);
+  const contract = findDesignContract(process.cwd()).contract;
   const diagnosticsByFile = [];
   for (const filePath of files) {
-    const diagnostics = scanFile(filePath);
+    const diagnostics = scanFile(filePath, undefined, contract);
     const { errors, warnings } = countBySeverity(diagnostics);
     diagnosticsByFile.push({ path: filePath, diagnostics, errors, warnings });
   }
