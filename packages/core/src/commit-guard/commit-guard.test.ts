@@ -44,6 +44,22 @@ describe('commit-guard', () => {
     expect(ruleIds('fix(auth): adjust `src/auth.ts`\n')).not.toContain('no-phantom-path');
   });
 
+  it('flags a path written without backticks', () => {
+    expect(ruleIds('fix(auth): adjust src/legacy/session.ts\n')).toContain('no-phantom-path');
+  });
+
+  it('accepts a bare path present in the diff', () => {
+    expect(ruleIds('fix(auth): adjust src/auth.ts\n')).not.toContain('no-phantom-path');
+  });
+
+  it('ignores a bare filename mentioned in prose', () => {
+    expect(ruleIds('fix(auth): see README.md for the rationale\n')).not.toContain('no-phantom-path');
+  });
+
+  it('ignores a URL in the message', () => {
+    expect(ruleIds('fix(auth): see https://github.com/owner/repo/pull/1\n')).not.toContain('no-phantom-path');
+  });
+
   it('flags a symbol claimed as added but absent', () => {
     expect(ruleIds('feat: add `refreshToken`\n')).toContain('no-phantom-addition');
   });

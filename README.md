@@ -47,6 +47,11 @@ XSS, WCAG failure, chatbot residue in published docs). `warning` is a pattern
 that needs a human decision. Only errors fail the build unless `--strict` is
 set.
 
+The counts above are patterns. `de-slop rules` lists 94 ids, including the
+aggregate verdicts a module emits once per file (a design bundle, a prose
+score, an unparseable MCP config, an empty commit message). `docs/RULES.md`
+carries the full list.
+
 ## Research this is built on
 
 - SlopCodeBench (arXiv:2603.24755): agent code is 2.3x more verbose and 2.0x more

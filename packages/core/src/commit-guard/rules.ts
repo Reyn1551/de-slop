@@ -14,13 +14,32 @@ const BACKTICKED = /`([^`\n]{2,80})`/g;
 const PATH_SHAPE = /(?:^|\/)[\w.-]+\.[a-z]{1,4}$/;
 const SYMBOL_SHAPE = /^[A-Za-z_$][\w$]*$/;
 
+// A path only counts when it carries a directory and an extension, so a bare
+// `README.md` referenced in prose is not treated as a claim about the diff.
+const BARE_PATH = /(?<![`\w/.-])((?:[\w.-]+\/)+[\w.-]+\.[a-z]{1,4})(?![`\w.-])/g;
+
 function namedPaths(context: CommitContext): { value: string; index: number }[] {
   const found: { value: string; index: number }[] = [];
+  const seen = new Set<string>();
+
   for (const match of context.message.matchAll(BACKTICKED)) {
     const value = match[1].trim();
     if (!PATH_SHAPE.test(value) || !value.includes('/')) continue;
-    found.push({ value: value.replace(/^\.\//, ''), index: match.index ?? 0 });
+    const normalized = value.replace(/^\.\//, '');
+    seen.add(normalized);
+    found.push({ value: normalized, index: match.index ?? 0 });
   }
+
+  // Paths are also written without backticks. Skipping them let a message name
+  // a file the diff never touched and pass.
+  for (const match of context.message.matchAll(BARE_PATH)) {
+    const value = match[1].replace(/^\.\//, '');
+    if (seen.has(value)) continue;
+    if (value.startsWith('http')) continue;
+    seen.add(value);
+    found.push({ value, index: match.index ?? 0 });
+  }
+
   return found;
 }
 

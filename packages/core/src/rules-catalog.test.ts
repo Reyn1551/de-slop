@@ -31,17 +31,14 @@ const REGISTERED: Record<string, string[]> = {
 
 /**
  * Ids a module emits as an aggregate or a harness failure, not because a pattern
- * matched. The README counts patterns, so these are excluded from the count.
+ * matched. The README counts patterns, so these four are excluded from the
+ * per-module count. `cross-cutting` has no README row of its own.
  */
 const SYNTHETIC_IDS = new Set([
   'design-slop-bundle',
   'prose-slop-bundle',
   'mcp-config-unparseable',
   'commit-empty-message',
-  'scan-error',
-  'test-lock',
-  'package-gate',
-  'design-contract-drift',
 ]);
 
 const catalogIds = RULES_CATALOG.map((rule) => rule.id);

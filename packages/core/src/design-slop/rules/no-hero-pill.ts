@@ -1,53 +1,74 @@
 import type { DesignSlopRuleFn, Diagnostic } from '../types';
-import { collectRegex, toColumn } from '../utils';
+import { toColumn } from '../utils';
 
 // A pill/badge floating above a hero heading is the #1 landing-page tell
 // (Krebs "hero pill", the anti-slop "colored dot + text pill above title").
-// The slop-scanner version only catches className literals like `hero-pill`;
-// this one catches the real-world implementation: a `<Badge>` component or a
-// rounded-full pill div whose className sits BEFORE an <h1>/<h2> in source order.
+//
+// Detection walks opening tags and judges each element once. Three separate
+// patterns used to match the same span — the className literal, the element,
+// and a `<Badge>` component — so one pill produced two identical findings at
+// different columns. One element, one finding.
+//
+// A pill is: rounded-full (or the 9999px arbitrary value), horizontal padding,
+// small text, and it sits within a few lines above an h1 or h2.
 
-const BADGE_COMPONENT = /<Badge\b[^>]*>/g;
+const TAG = /<(?:div|span|p|section|Badge|Tag|Chip)\b[^>]*>/g;
+const HEADING = /<h[12]\b/g;
 
-// pill-shaped wrapper: rounded-full + horizontal/vertical padding + small text
-const PILL_CLASS = /className\s*=\s*["'][^"']*\brounded-full\b[^"']*\b(?:px-[2-4]|px-2\.5|px-3\.5)\b[^"']*\b(?:py-0?\.?5|py-1|py-1\.5|py-2)\b[^"']*\b(?:text-xs|text-sm|text-\[1[012]px\])\b[^"']*["']/g;
+const PILL_TEXT_SIZE = /\btext-(?:xs|sm|\[\d+px\])/;
+const HORIZONTAL_PADDING = /\b(?:px-(?:[2-4]|2\.5|3\.5)|px-\[)/;
+const VERTICAL_PADDING = /\b(?:py-(?:0?\.?5|1|1\.5|2)|py-\[)/;
+const PILL_RADIUS = /\b(?:rounded-full|rounded-\[9999px\])/;
 
-// pillar shape alternative: pill classes on any element (div/span/p) via props
-const PILL_ELEMENT = /<(?:div|span|p|section)\b[^>]*\b(?:rounded-full|rounded-\[9999px\])\b[^>]*\b(?:px-[2-4]|px-2\.5|px-3\.5)\b[^>]*\b(?:text-xs|text-sm)\b[^>]*>/g;
+// emoji plus a short label is the classic pill content ("Now live")
+const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
+const PILL_LABEL = /\b(?:uppercase|tracking-wide)\b/;
 
-const HEADING = /<h1\b|<h2\b/g;
+const MAX_LINES_TO_HEADING = 7;
 
-// emoji + short uppercase label = the classic pill content ("🚀 Now Live")
-const PILL_TEXT = /[🚀✨🎉💡🔥⚡✅🎯🌟💫]/;
+function classNameOf(tag: string): string {
+  const match = /\bclassName\s*=\s*(?:"([^"]*)"|'([^']*)'|\{`([^`]*)`\})/.exec(tag);
+  return match?.[1] ?? match?.[2] ?? match?.[3] ?? '';
+}
+
+function isPill(tag: string, body: string): boolean {
+  const className = classNameOf(tag);
+  const isComponent = /^<(?:Badge|Tag|Chip)\b/.test(tag);
+
+  // A Badge/Tag/Chip carries its own radius, so the className only has to look
+  // like a micro-label. A plain element has to declare the pill shape itself.
+  const shaped = isComponent
+    ? HORIZONTAL_PADDING.test(className) && PILL_TEXT_SIZE.test(className)
+    : PILL_RADIUS.test(className) && HORIZONTAL_PADDING.test(className) && PILL_TEXT_SIZE.test(className);
+  if (!shaped) return false;
+
+  if (isComponent) return true;
+  if (VERTICAL_PADDING.test(className)) return true;
+
+  // An emoji or an uppercase micro-label inside the element seals it.
+  return EMOJI.test(body) || PILL_LABEL.test(body);
+}
 
 export const noHeroPill: DesignSlopRuleFn = (code, _filePath, locator) => {
+  const headings = [...code.matchAll(HEADING)].map((match) => match.index ?? 0);
+  if (headings.length === 0) return [];
+
   const findings: Omit<Diagnostic, 'filePath' | 'ruleId'>[] = [];
 
-  const pills: number[] = [];
-  for (const hit of collectRegex(code, BADGE_COMPONENT)) {
-    const window = code.slice(hit.index, hit.index + 200);
-    if (PILL_TEXT.test(window) || /uppercase|tracking-wide|text-xs|text-sm/.test(window)) {
-      pills.push(hit.index);
-    }
-  }
-  for (const hit of collectRegex(code, PILL_CLASS)) pills.push(hit.index);
-  for (const hit of collectRegex(code, PILL_ELEMENT)) pills.push(hit.index);
+  for (const match of code.matchAll(TAG)) {
+    const index = match.index ?? 0;
+    const body = code.slice(index, index + 220);
+    if (!isPill(match[0], body)) continue;
 
-  const headings = collectRegex(code, HEADING).map((h) => h.index);
-  if (pills.length === 0 || headings.length === 0) return findings;
-
-  for (const pillPos of pills) {
-    const nextHeading = headings.find((h) => h > pillPos);
+    const nextHeading = headings.find((heading) => heading > index);
     if (nextHeading === undefined) continue;
-    // pill must sit within ~6 lines of the heading to be a hero pill
-    const slice = code.slice(pillPos, nextHeading);
-    if (slice.split('\n').length > 7) continue;
+    if (code.slice(index, nextHeading).split('\n').length > MAX_LINES_TO_HEADING) continue;
 
-    const loc = toColumn(locator.getLineAndCharacterOfPosition(pillPos));
     findings.push({
       severity: 'warning',
-      message: 'Hero pill badge floating above a heading — the #1 AI slop landing-page tell. Remove it or replace with a real product signal (e.g. an actual stat).',
-      ...loc,
+      message:
+        'Hero pill badge floating above a heading — the #1 AI slop landing-page tell. Remove it or replace it with a real product signal (e.g. an actual stat).',
+      ...toColumn(locator.getLineAndCharacterOfPosition(index)),
     });
   }
 
