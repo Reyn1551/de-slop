@@ -1,10 +1,13 @@
-# Test Fixtures
+# Test fixtures
 
-Sample kode kotor (slop) dan bersih untuk menguji rules `slop-scanner`, `test-lock`, dan `spec-contractor`.
+Sample code for the CLI and module tests.
 
-| File | Kegunaan |
+| File | Purpose |
 |---|---|
-| `slop-fixture.ts` | Kode kotor: hardcoded secret (`no-hardcoded-secret`), unused var, empty catch, redundant comment. CLI `check` harus exit 1. |
-| `clean-fixture.ts` | Kode bersih. CLI `check` harus exit 0. |
-| `test-lock/locked.fixture.ts` | File test untuk lock → weaken → verify (`test-lock`). |
-| `spec/de-slop.spec.yml` | Spec YAML untuk `spec-contractor` (functions + invariants). |
+| `slop-fixture.ts` | Dirty code: hardcoded secret, unused variable, empty catch, redundant comment. `de-slop check` must exit 1. |
+| `clean-fixture.ts` | Clean code. `de-slop check` must exit 0. |
+| `test-lock/locked.fixture.ts` | A test file used for lock, weaken, verify. |
+| `spec/de-slop.spec.yml` | Spec contract for `spec-contractor`. |
+
+Fixtures contain slop on purpose, so `.desloprc.json` excludes this directory
+from repo-wide scans.
