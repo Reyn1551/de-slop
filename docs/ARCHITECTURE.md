@@ -43,6 +43,7 @@ still report, so one unparseable file does not hide the rest of the run.
 | `design-contract` | `parseDesignContract`, `findDesignContract`, `scanDrift` | YAML subset + color math |
 | `mcp-guard` | `scanMcpConfig` | JSON over MCP client configs |
 | `commit-guard` | `analyzeCommitMessage` | message against a diff |
+| `report` | `htmlReport` | standalone HTML renderer |
 | `ux-guard` | `scanUx` | regex over JSX/HTML/CSS, 12 rules |
 | `prose-slop` | `scanProse`, `analyzeProse` | text, 14 rules + score |
 | `context-rot` | `scanContextRot`, `collectRepoFacts` | text against repo facts, 4 rules |
