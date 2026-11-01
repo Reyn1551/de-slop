@@ -7,6 +7,16 @@ function isGeneric(name: string): boolean {
   return GENERIC_NAMES.has(name) || /^(data|temp|result|item)\d*$/.test(name);
 }
 
+// `items.filter((value) => ...)` is the callback signature, not a naming
+// choice. The name comes from the call site, so flagging it asked the author to
+// fight the array method. A binding in real code still gets reported.
+function isCallbackParameter(node: Node): boolean {
+  const parameterList = node.parent;
+  if (!parameterList || !ast.isArrowFunction(parameterList) && !ast.isFunctionExpression(parameterList)) return false;
+  const call = parameterList.parent;
+  return ast.isCallExpression(call) && call.arguments.some((argument) => argument.pos === parameterList.pos);
+}
+
 export const noGenericName: Rule = {
   id: 'no-generic-name',
   check(sourceFile) {
@@ -34,7 +44,7 @@ export const noGenericName: Rule = {
         }
       } else if (ast.isParameterDeclaration(node)) {
         const nameNode = node.name;
-        if (ast.isIdentifier(nameNode) && isGeneric(nameNode.text)) {
+        if (ast.isIdentifier(nameNode) && isGeneric(nameNode.text) && !isCallbackParameter(node)) {
           report(nameNode.text, node);
         }
       } else if (ast.isFunctionDeclaration(node) && node.name && isGeneric(node.name.text)) {

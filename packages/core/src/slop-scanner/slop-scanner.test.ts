@@ -275,6 +275,17 @@ describe('no-generic-name', () => {
     const code = 'const userList = fetchAll();\nconst total = process(userList);\nconsole.log(total);\n';
     expect(scanSource(code, 'ok.ts', { rules: ['no-generic-name'] })).toEqual([]);
   });
+
+  it('allows a callback parameter named by the array method', () => {
+    const code = 'const names = users.filter((item) => item.active).map((value) => value.name);\nconsole.log(names);\n';
+    expect(scanSource(code, 'ok.ts', { rules: ['no-generic-name'] })).toEqual([]);
+  });
+
+  it('still flags a generic binding that is not a callback parameter', () => {
+    const code = 'function accumulate(rows: number[]) {\n  const result = rows.map((row) => row + 1);\n  return result;\n}\naccumulate([1]);\n';
+    const diags = scanSource(code, 'gen.ts', { rules: ['no-generic-name'] });
+    expect(diags.some((d) => d.ruleId === 'no-generic-name')).toBe(true);
+  });
 });
 
 describe('no-sycophancy', () => {
